@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  DEVELOPER
+  READ_ONLY
+}
+
+enum DbUserRole {
+  READ_ONLY
+  READ_WRITE
+  ADMIN
+  BACKUP
+}
+
+enum ServerStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+enum AccessProfile {
+  APP_READONLY
+  APP_READWRITE
+  APP_ADMIN
+}
+
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROVISIONED
+  EXPIRED
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  accessKey    String    @unique @map("access_key")
+  passwordHash String    @map("password_hash")
+  role         UserRole  @default(DEVELOPER)
+  isActive     Boolean   @default(true) @map("is_active")
+  isLocked     Boolean   @default(false) @map("is_locked")
+  ipAllowlist  String[]  @map("ip_allowlist")
+  totpSecret   String?   @map("totp_secret")
+  totpEnabled  Boolean   @default(false) @map("totp_enabled")
+  failedLogins Int       @default(0) @map("failed_logins")
+  expiry       DateTime? @map("expiry")
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?  @map("user_id")
+  action     String
+  resource   String
+  resourceId String?  @map("resource_id")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  status     String   @default("SUCCESS")
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model PostgresServer {
+  id          String       @id @default(uuid())
+  name        String
+  environment String       @default("development")
+  host        String
+  port        Int          @default(5432)
+  sslEnabled  Boolean      @default(true) @map("ssl_enabled")
+  ownerTeam   String?      @map("owner_team")
+  secretRef   String       @map("secret_ref")
+  status      ServerStatus @default(ACTIVE)
+  createdBy   String?      @map("created_by")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  databases   PostgresDatabase[]
+  pgUsers     PostgresUser[]
+  accessRequests AccessRequest[]
+
+  @@map("postgres_servers")
+}
+
+model PostgresDatabase {
+  id          String   @id @default(uuid())
+  name        String
+  owner       String?
+  size        String?
+  connections Int?
+  serverId    String   @map("server_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  server       PostgresServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  postgresUsers PostgresUser[]
+  accessRequests AccessRequest[]
+
+  @@unique([serverId, name])
+  @@map("postgres_databases")
+}
+
+model PostgresUser {
+  id           String        @id @default(uuid())
+  username     String
+  server       String
+  databaseName String        @map("database_name")
+  role         DbUserRole    @default(READ_ONLY)
+  accessProfile AccessProfile?
+  isActive     Boolean       @default(true) @map("is_active")
+  expiry       DateTime?
+  passwordHash String?       @map("password_hash")
+  createdBy    String?       @map("created_by")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  serverId   String?          @map("server_id")
+  databaseId String?          @map("database_id")
+  serverRef  PostgresServer?  @relation(fields: [serverId], references: [id])
+  databaseRef PostgresDatabase? @relation(fields: [databaseId], references: [id])
+
+  @@unique([username, server, databaseName])
+  @@map("postgres_users")
+}
+
+model AccessRequest {
+  id            String              @id @default(uuid())
+  userId        String              @map("user_id")
+  username      String
+  serverId      String              @map("server_id")
+  databaseName  String?
+  databaseId    String?             @map("database_id")
+  accessProfile AccessProfile       @map("access_profile")
+  status        AccessRequestStatus @default(PENDING)
+  reason        String?
+  approvedBy    String?             @map("approved_by")
+  approvedAt    DateTime?           @map("approved_at")
+  expiresAt     DateTime?           @map("expires_at")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  server  PostgresServer  @relation(fields: [serverId], references: [id])
+  database PostgresDatabase? @relation(fields: [databaseId], references: [id])
+
+  @@map("access_requests")
+}
+
+model Pipeline {
+  id             String    @id @default(uuid())
+  appName        String    @map("app_name")
+  repoUrl        String    @map("repo_url")
+  framework      String
+  dockerfilePath String    @map("dockerfile_path")
+  azureRegion    String    @map("azure_region")
+  containerApp   String    @map("container_app")
+  status         String    @default("GENERATED")
+  createdBy      String?   @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  githubOrg      String?   @map("github_org")
+  githubRepo     String?   @map("github_repo")
+  githubBranch   String?   @default("main") @map("github_branch")
+  webhookId      Int?      @map("webhook_id")
+  webhookSecret  String?   @map("webhook_secret")
+  lastDeployedAt DateTime? @map("last_deployed_at")
+  deploymentUrl  String?   @map("deployment_url")
+  version        Int       @default(1)
+  auditLog       Json?     @map("audit_log")
+
+  @@map("pipelines")
+}
+
+model Secret {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  keyVaultRef String    @map("key_vault_ref")
+  description String?
+  environment String    @default("production")
+  createdBy   String?   @map("created_by")
+  rotatedAt   DateTime? @map("rotated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("secrets")
+}
+
+model AppSettings {
+  id                    String  @id @default(uuid())
+  sessionTimeoutMinutes Int     @default(30) @map("session_timeout_minutes")
+  updatedBy             String? @map("updated_by")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
+
+model Invitation {
+  id        String    @id @default(uuid())
+  email     String
+  token     String    @unique
+  role      UserRole  @default(DEVELOPER)
+  usedAt    DateTime? @map("used_at")
+  expiresAt DateTime  @map("expires_at")
+  createdBy String?   @map("created_by")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("invitations")
+}

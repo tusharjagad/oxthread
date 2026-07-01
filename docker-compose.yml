@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:password@db:5432/oxthread
+      - JWT_SECRET=local-dev-jwt-secret-key-32-chars
+      - NEXTAUTH_SECRET=local-dev-nextauth-secret-key-32-chars
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - oxthread-network
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=oxthread
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oxthread-network
+
+volumes:
+  pgdata:
+
+networks:
+  oxthread-network:
+    driver: bridge
