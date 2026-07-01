@@ -49,9 +49,9 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
   useEffect(() => {
     if (!form.serverId) { setDatabases([]); return }
     setLoadingDbs(true)
-    serversApi.get(form.serverId).then((d) => {
-      const data = d as { server?: { databases?: Array<{ name: string }> } }
-      setDatabases(data.server?.databases || [])
+    serversApi.discoverDatabases(form.serverId).then((d) => {
+      const data = d as { databases?: Array<{ name: string }> }
+      setDatabases(data.databases || [])
       setForm(f => ({ ...f, databaseName: '' }))
     }).catch(() => setDatabases([]))
     .finally(() => setLoadingDbs(false))
