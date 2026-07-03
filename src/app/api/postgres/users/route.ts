@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          serverRef: { select: { name: true, host: true } },
+          serverRef: { select: { name: true, host: true, port: true, sslEnabled: true } },
           databaseRef: { select: { name: true } },
         },
       }),

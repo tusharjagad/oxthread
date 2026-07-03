@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Search, RefreshCw, Users, ToggleRight, ToggleLeft, Trash2, Key, X, Check, Copy } from '@/lib/icons'
+import { Plus, Search, RefreshCw, Users, ToggleRight, ToggleLeft, Trash2, Key, X, Check, Copy, ExternalLink } from '@/lib/icons'
 import { serversApi, usersApi } from '@/lib/api/postgresql'
 
 interface PgUser {
@@ -14,7 +14,7 @@ interface PgUser {
   isActive: boolean
   expiry: string | null
   createdAt: string
-  serverRef?: { name: string; host: string } | null
+  serverRef?: { name: string; host: string; port: number; sslEnabled: boolean } | null
   databaseRef?: { name: string } | null
 }
 
@@ -220,6 +220,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -251,6 +252,15 @@ export default function UsersPage() {
       alert('Password rotated and copied to clipboard.')
     }
     load()
+  }
+
+  const copyConnStr = (u: PgUser) => {
+    if (!u.serverRef) return
+    const ssl = u.serverRef.sslEnabled ? '?sslmode=require' : ''
+    const connStr = `postgres://${u.username}:PASSWORD@${u.serverRef.host}:${u.serverRef.port}/${u.databaseRef?.name || u.databaseName}${ssl}`
+    navigator.clipboard.writeText(connStr)
+    setCopiedId(u.id)
+    setTimeout(() => setCopiedId(null), 2000)
   }
 
   return (
@@ -329,6 +339,9 @@ export default function UsersPage() {
                   <div className="flex gap-1">
                     <button className="btn btn-icon btn-ghost" title={u.isActive ? 'Disable' : 'Enable'} onClick={() => toggle(u.id, u.isActive)}>
                       {u.isActive ? <ToggleRight size={16} style={{ color: 'var(--success)' }} /> : <ToggleLeft size={16} />}
+                    </button>
+                    <button className="btn btn-icon btn-ghost" title="Copy Connection String" onClick={() => copyConnStr(u)}>
+                      {copiedId === u.id ? <Check size={15} style={{ color: 'var(--success)' }} /> : <ExternalLink size={15} />}
                     </button>
                     <button className="btn btn-icon btn-ghost" title="Rotate Password" onClick={() => rotate(u.id, u.username)}>
                       <Key size={15} />

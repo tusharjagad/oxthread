@@ -4,6 +4,7 @@
 
 ### Added
 - **Connection string copy on user creation** (`/dashboard/postgresql/users`) — after creating a PostgreSQL user, the modal now shows the full `postgres://username:password@host:port/dbname?sslmode=require` connection string with a copy button, ready to share with the team.
+- **Connection string copy for existing users** (`/dashboard/postgresql/users`) — new "Copy Connection String" button per user row copies `postgres://username:PASSWORD@host:port/database?sslmode=require` (replace `PASSWORD` with actual password).
 - **POST /api/postgres/users response** — now returns `serverHost`, `serverPort`, `serverName`, and `sslEnabled` so the frontend can build the connection string.
 
 ### Fixed
