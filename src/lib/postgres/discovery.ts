@@ -25,7 +25,7 @@ export async function discoverDatabases(serverId: string): Promise<DiscoveredDat
   if (!server) throw new Error('Server not found')
 
   const creds = await resolveCredentials(server.secretRef)
-  const adminCreds = { ...creds, database: 'postgres' }
+  const adminCreds = { ...creds, ssl: server.sslEnabled || creds.ssl, database: 'postgres' }
 
   const result = await query(
     adminCreds,
@@ -52,7 +52,7 @@ export async function discoverRoles(serverId: string): Promise<DiscoveredRole[]>
   if (!server) throw new Error('Server not found')
 
   const creds = await resolveCredentials(server.secretRef)
-  const adminCreds = { ...creds, database: 'postgres' }
+  const adminCreds = { ...creds, ssl: server.sslEnabled || creds.ssl, database: 'postgres' }
 
   const result = await query(
     adminCreds,

@@ -23,7 +23,7 @@ export async function POST(
     }
 
     const creds = await resolveCredentials(server.secretRef)
-    const adminCreds = { ...creds, database: 'postgres' }
+    const adminCreds = { ...creds, ssl: server.sslEnabled || creds.ssl, database: 'postgres' }
 
     const result = await testConnection(adminCreds)
 

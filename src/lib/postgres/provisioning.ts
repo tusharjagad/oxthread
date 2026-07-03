@@ -33,7 +33,7 @@ export async function createPostgresUser(
   }
 ): Promise<void> {
   const creds = await resolveCredentials(connectionInfo.secretRef)
-  const adminCreds = { ...creds, database: connectionInfo.adminDatabase || 'postgres' }
+  const adminCreds = { ...creds, ssl: connectionInfo.ssl || creds.ssl, database: connectionInfo.adminDatabase || 'postgres' }
 
   let adminClient: PoolClient | null = null
   try {
@@ -50,7 +50,7 @@ export async function createPostgresUser(
 
   if (!params.databaseName) return
 
-  const targetCreds = { ...creds, database: params.databaseName }
+  const targetCreds = { ...creds, ssl: connectionInfo.ssl || creds.ssl, database: params.databaseName }
   let targetClient: PoolClient | null = null
   try {
     targetClient = await getClient(targetCreds)
