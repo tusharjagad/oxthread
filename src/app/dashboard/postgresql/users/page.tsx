@@ -221,6 +221,7 @@ export default function UsersPage() {
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [passwordPrompt, setPasswordPrompt] = useState<{ user: PgUser; password: string } | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -254,22 +255,60 @@ export default function UsersPage() {
     load()
   }
 
-  const copyConnStr = async (u: PgUser) => {
+  const copyConnStr = (u: PgUser) => {
     if (!u.serverRef) return
-    if (!confirm(`Generate a new password for "${u.username}" and copy the full connection string?`)) return
-    const result = (await usersApi.rotatePassword(u.id)) as { password?: string }
-    if (!result.password) return
+    setPasswordPrompt({ user: u, password: '' })
+  }
+
+  const submitConnStr = () => {
+    if (!passwordPrompt || !passwordPrompt.password) return
+    const u = passwordPrompt.user
+    if (!u.serverRef) return
     const ssl = u.serverRef.sslEnabled ? '?sslmode=require' : ''
-    const connStr = `postgres://${u.username}:${result.password}@${u.serverRef.host}:${u.serverRef.port}/${u.databaseRef?.name || u.databaseName}${ssl}`
-    await navigator.clipboard.writeText(connStr)
+    const connStr = `postgres://${u.username}:${passwordPrompt.password}@${u.serverRef.host}:${u.serverRef.port}/${u.databaseRef?.name || u.databaseName}${ssl}`
+    navigator.clipboard.writeText(connStr)
     setCopiedId(u.id)
+    setPasswordPrompt(null)
     setTimeout(() => setCopiedId(null), 2000)
-    load()
   }
 
   return (
     <div className="animate-fadein">
       {showCreate && <CreateUserModal onClose={() => setShowCreate(false)} onCreated={load} />}
+
+      {passwordPrompt && (
+        <div className="modal-backdrop" onClick={() => setPasswordPrompt(null)}>
+          <div className="modal" style={{ maxWidth: 480 }}>
+            <div className="modal-header">
+              <h2 style={{ fontWeight: 700, fontSize: '1.05rem' }}>Enter Password</h2>
+              <button className="btn btn-icon btn-ghost" onClick={() => setPasswordPrompt(null)}><X size={18} /></button>
+            </div>
+            <div className="modal-body" style={{ padding: '1.5rem' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                Enter the password for <strong>{passwordPrompt.user.username}</strong> to copy the full connection string.
+              </p>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input
+                  className="form-input font-mono"
+                  type="password"
+                  autoFocus
+                  value={passwordPrompt.password}
+                  onChange={(e) => setPasswordPrompt(p => p ? { ...p, password: e.target.value } : null)}
+                  onKeyDown={(e) => e.key === 'Enter' && submitConnStr()}
+                  placeholder="Enter password"
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setPasswordPrompt(null)}>Cancel</button>
+              <button className="btn btn-primary" onClick={submitConnStr} disabled={!passwordPrompt.password}>
+                <Check size={15} /> Copy Connection String
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="page-header">
         <div>
