@@ -254,13 +254,17 @@ export default function UsersPage() {
     load()
   }
 
-  const copyConnStr = (u: PgUser) => {
+  const copyConnStr = async (u: PgUser) => {
     if (!u.serverRef) return
+    if (!confirm(`Generate a new password for "${u.username}" and copy the full connection string?`)) return
+    const result = (await usersApi.rotatePassword(u.id)) as { password?: string }
+    if (!result.password) return
     const ssl = u.serverRef.sslEnabled ? '?sslmode=require' : ''
-    const connStr = `postgres://${u.username}:PASSWORD@${u.serverRef.host}:${u.serverRef.port}/${u.databaseRef?.name || u.databaseName}${ssl}`
-    navigator.clipboard.writeText(connStr)
+    const connStr = `postgres://${u.username}:${result.password}@${u.serverRef.host}:${u.serverRef.port}/${u.databaseRef?.name || u.databaseName}${ssl}`
+    await navigator.clipboard.writeText(connStr)
     setCopiedId(u.id)
     setTimeout(() => setCopiedId(null), 2000)
+    load()
   }
 
   return (
