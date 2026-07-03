@@ -33,8 +33,10 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
     accessProfile: 'APP_READWRITE', expiry: '',
   })
   const [generatedPassword, setGeneratedPassword] = useState('')
+  const [connectionInfo, setConnectionInfo] = useState<{ host: string; port: number; name: string; ssl: boolean } | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [copiedConnStr, setCopiedConnStr] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [step, setStep] = useState(1)
@@ -73,6 +75,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
     setLoading(false)
     if (!res.ok) { setError(data.error); return }
     setGeneratedPassword(data.password)
+    setConnectionInfo({ host: data.serverHost, port: data.serverPort, name: data.serverName, ssl: data.sslEnabled })
     setShowPassword(true)
     setStep(5)
     onCreated()
@@ -84,23 +87,47 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const buildConnectionString = () => {
+    if (!connectionInfo) return ''
+    const ssl = connectionInfo.ssl ? '?sslmode=require' : ''
+    return `postgres://${form.username}:${generatedPassword}@${connectionInfo.host}:${connectionInfo.port}/${form.databaseName}${ssl}`
+  }
+
+  const copyConnectionString = () => {
+    navigator.clipboard.writeText(buildConnectionString())
+    setCopiedConnStr(true)
+    setTimeout(() => setCopiedConnStr(false), 2000)
+  }
+
   const close = () => {
     if (showPassword && !confirm('Password will not be shown again. Copy it now.')) return
     onClose()
   }
 
   if (step === 5 && showPassword) {
+    const connStr = buildConnectionString()
     return (
       <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && close()}>
-        <div className="modal" style={{ maxWidth: 480 }}>
+        <div className="modal" style={{ maxWidth: 600 }}>
           <div className="modal-header">
             <h2 style={{ fontWeight: 700, fontSize: '1.05rem' }}>User Created Successfully</h2>
             <button className="btn btn-icon btn-ghost" onClick={close}><X size={18} /></button>
           </div>
-          <div className="modal-body" style={{ textAlign: 'center', padding: '2rem' }}>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-              User <strong style={{ color: 'var(--text-primary)' }}>{form.username}</strong> has been provisioned on <strong style={{ color: 'var(--text-primary)' }}>{form.databaseName}</strong>
+          <div className="modal-body" style={{ padding: '1.5rem' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem', textAlign: 'center' }}>
+              User <strong style={{ color: 'var(--text-primary)' }}>{form.username}</strong> provisioned on <strong style={{ color: 'var(--text-primary)' }}>{form.databaseName}</strong> via <strong style={{ color: 'var(--text-primary)' }}>{connectionInfo?.name || ''}</strong>
             </div>
+
+            <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+              <label className="form-label">Connection String (share with team)</label>
+              <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
+                <input className="form-input font-mono" readOnly value={connStr} style={{ fontSize: '0.72rem' }} />
+                <button className="btn btn-secondary" onClick={copyConnectionString} title="Copy connection string">
+                  {copiedConnStr ? <Check size={15} style={{ color: 'var(--success)' }} /> : <Copy size={15} />}
+                </button>
+              </div>
+            </div>
+
             <div className="form-group" style={{ marginBottom: '0.75rem' }}>
               <label className="form-label">Generated Password (copy now — will not be shown again)</label>
               <div className="flex gap-2" style={{ alignItems: 'stretch' }}>
@@ -111,7 +138,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
               </div>
             </div>
             <div className="alert alert-warning" style={{ fontSize: '0.75rem' }}>
-              This password will not be stored in plain text. Copy it now.
+              Password is only shown once. Copy the connection string or password now.
             </div>
           </div>
           <div className="modal-footer">

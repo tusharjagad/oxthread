@@ -1,6 +1,15 @@
 # Changelog
 
-## 0.6.0 (Current) — 2026-07-01
+## 0.7.0 (Current) — 2026-07-03
+
+### Added
+- **Connection string copy on user creation** (`/dashboard/postgresql/users`) — after creating a PostgreSQL user, the modal now shows the full `postgres://username:password@host:port/dbname?sslmode=require` connection string with a copy button, ready to share with the team.
+- **POST /api/postgres/users response** — now returns `serverHost`, `serverPort`, `serverName`, and `sslEnabled` so the frontend can build the connection string.
+
+### Fixed
+- **SSL disabled for remote PostgreSQL servers** — `sslEnabled` flag from the server record was not propagated to actual database connections. Fixed in `discovery.ts`, `provisioning.ts`, and `test/route.ts` so `PG_LOCAL`-style env vars and server SSL settings are both respected.
+
+## 0.6.0 — 2026-07-01
 
 ### Added
 - **Access Control page** (`/dashboard/access-control`) — shows the current user's role, a visual overview of all 4 roles with descriptions, and IP access control reference.

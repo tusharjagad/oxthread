@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(
-      { pgUser, password },
+      { pgUser, password, serverHost: server.host, serverPort: server.port, serverName: server.name, sslEnabled: server.sslEnabled },
       { status: 201 }
     )
   } catch (error: unknown) {
