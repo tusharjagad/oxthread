@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { RefreshCw, Database, Server } from '@/lib/icons'
+import { RefreshCw, Database, Server, Plus, Check, X } from '@/lib/icons'
 import Link from 'next/link'
 
 interface DatabaseInfo {
@@ -14,12 +14,73 @@ interface DatabaseInfo {
   serverName?: string
 }
 
+function CreateDatabaseModal({ servers, onClose, onCreated }: { servers: { id: string; name: string }[]; onClose: () => void; onCreated: () => void }) {
+  const [form, setForm] = useState({ serverId: '', name: '', owner: '' })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const submit = async () => {
+    setError('')
+    if (!form.serverId || !form.name) { setError('Server and database name are required'); return }
+    setLoading(true)
+    const res = await fetch('/api/postgres/databases', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+    const data = await res.json()
+    setLoading(false)
+    if (!res.ok) { setError(data.error); return }
+    onCreated()
+    onClose()
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal" style={{ maxWidth: 480 }}>
+        <div className="modal-header">
+          <h2 style={{ fontWeight: 700, fontSize: '1.05rem' }}>Create Database</h2>
+          <button className="btn btn-icon btn-ghost" onClick={onClose}><X size={18} /></button>
+        </div>
+        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {error && <div className="alert alert-error">{error}</div>}
+          <div className="form-group">
+            <label className="form-label">Server *</label>
+            <select className="form-select" value={form.serverId} onChange={(e) => setForm(f => ({ ...f, serverId: e.target.value }))}>
+              <option value="">-- Select Server --</option>
+              {servers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Database Name *</label>
+            <input className="form-input font-mono" value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} placeholder="my_database" />
+            <p className="text-sm text-muted" style={{ marginTop: '0.25rem' }}>Lowercase letters, numbers, and underscores only</p>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Owner (optional)</label>
+            <input className="form-input font-mono" value={form.owner} onChange={(e) => setForm(f => ({ ...f, owner: e.target.value }))} placeholder="postgres" />
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={submit} disabled={loading}>
+            {loading ? <span className="spinner" style={{ width: 14, height: 14 }} /> : <Database size={15} />}
+            Create Database
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function DatabasesPage() {
   const [servers, setServers] = useState<Array<{ id: string; name: string }>>([])
   const [selectedServer, setSelectedServer] = useState('')
   const [databases, setDatabases] = useState<DatabaseInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showCreate, setShowCreate] = useState(false)
+  const [created, setCreated] = useState(0)
 
   useEffect(() => {
     fetch('/api/postgres/servers')
@@ -54,6 +115,9 @@ export default function DatabasesPage() {
           </h1>
           <p className="page-subtitle">Browse databases on registered PostgreSQL servers</p>
         </div>
+        <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+          <Plus size={15} /> Create Database
+        </button>
       </div>
 
       <div className="card mb-4">
@@ -119,6 +183,10 @@ export default function DatabasesPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {showCreate && (
+        <CreateDatabaseModal servers={servers} onClose={() => setShowCreate(false)} onCreated={() => setCreated(c => c + 1)} />
       )}
     </div>
   )

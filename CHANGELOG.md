@@ -7,7 +7,16 @@
 - **Connection string copy for existing users** (`/dashboard/postgresql/users`) — new "Copy Connection String" button per user row copies `postgres://username:PASSWORD@host:port/database?sslmode=require` (replace `PASSWORD` with actual password).
 - **POST /api/postgres/users response** — now returns `serverHost`, `serverPort`, `serverName`, and `sslEnabled` so the frontend can build the connection string.
 
+### Added
+- **Create Database API** (`POST /api/postgres/databases`) — creates a database on a registered PostgreSQL server with Zod validation, RBAC (ADMIN+), duplicate check, and audit logging.
+- **Create Database UI** (`/dashboard/postgresql/databases`) — inline modal with server selection, database name, optional owner field; refreshes table on creation.
+
+### Changed
+- **Login page redesigned** (`/app/login/page.tsx`) — removed all animated blobs, floating particles, 3D tilt, emoji icons, conic gradient rings, and glass morphism. Replaced with clean, minimal, professional card layout using standard form inputs and `@/lib/icons`.
+- **Password generation** (`src/lib/postgres/provisioning.ts`) — `generatePassword()` now uses only alphanumeric characters (no special chars) for database compatibility.
+
 ### Fixed
+- **PostgreSQL pool hanging queries** — added `query_timeout: 30000` to `Pool` constructor and `SET statement_timeout = '30s'` on pool `connect` event in `src/lib/postgres/pool.ts`. Added `SET lock_timeout = '10s'` before `REASSIGN/DROP OWNED BY` in `provisioning.ts`. Silent `.catch()` blocks now re-throw errors instead of swallowing them.
 - **SSL disabled for remote PostgreSQL servers** — `sslEnabled` flag from the server record was not propagated to actual database connections. Fixed in `discovery.ts`, `provisioning.ts`, and `test/route.ts` so `PG_LOCAL`-style env vars and server SSL settings are both respected.
 
 ## 0.6.0 — 2026-07-01

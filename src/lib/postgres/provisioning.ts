@@ -4,20 +4,15 @@ import { PoolClient } from 'pg'
 import { AccessProfile } from '@prisma/client'
 
 export function generatePassword(length = 16): string {
-  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  const lower = 'abcdefghijklmnopqrstuvwxyz'
-  const digits = '0123456789'
-  const special = '!@#$%^&*()-_=+'
-  const all = upper + lower + digits + special
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
   let password = ''
-  password += upper[Math.floor(Math.random() * upper.length)]
-  password += lower[Math.floor(Math.random() * lower.length)]
-  password += digits[Math.floor(Math.random() * digits.length)]
-  password += special[Math.floor(Math.random() * special.length)]
+  password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]
+  password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]
+  password += '0123456789'[Math.floor(Math.random() * 10)]
 
-  for (let i = 4; i < length; i++) {
-    password += all[Math.floor(Math.random() * all.length)]
+  for (let i = 3; i < length; i++) {
+    password += charset[Math.floor(Math.random() * charset.length)]
   }
 
   return password.split('').sort(() => Math.random() - 0.5).join('')
@@ -54,6 +49,7 @@ export async function createPostgresUser(
   let targetClient: PoolClient | null = null
   try {
     targetClient = await getClient(targetCreds)
+    await targetClient.query("SET lock_timeout = '10s'")
     await targetClient.query('BEGIN')
 
     const grants = getGrantsForProfile(params.accessProfile, params.databaseName)
@@ -103,12 +99,14 @@ export async function deleteUser(
     let dbClient: PoolClient | null = null
     try {
       dbClient = await getClient(dbCreds)
+      await dbClient.query("SET lock_timeout = '10s'")
       await dbClient.query('BEGIN')
       await dbClient.query(`REASSIGN OWNED BY "${username}" TO postgres`)
       await dbClient.query(`DROP OWNED BY "${username}"`)
       await dbClient.query('COMMIT')
-    } catch {
+    } catch (error) {
       if (dbClient) await dbClient.query('ROLLBACK')
+      throw error
     } finally {
       if (dbClient) dbClient.release()
     }
@@ -119,6 +117,7 @@ export async function deleteUser(
   let client: PoolClient | null = null
   try {
     client = await getClient(adminCreds)
+    await client.query("SET lock_timeout = '10s'")
     await client.query('BEGIN')
 
     await client.query(`REASSIGN OWNED BY "${username}" TO postgres`)

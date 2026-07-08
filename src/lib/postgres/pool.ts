@@ -31,6 +31,11 @@ export function createPool(conn: ServerConnection): Pool {
     max: 5,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
+    query_timeout: 30000,
+  })
+
+  pool.on('connect', (client) => {
+    client.query("SET statement_timeout = '30s'")
   })
 
   connectionCache.set(key, pool)
