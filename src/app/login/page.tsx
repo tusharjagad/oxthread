@@ -204,7 +204,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="hidden lg:flex flex-col w-[44%] min-h-screen relative z-10 pl-14 pr-8 xl:pl-16 xl:pr-10 2xl:pl-[72px] 2xl:pr-12"
+        className="hidden lg:flex flex-col w-[44%] min-h-screen relative z-10 pt-10 pb-6 pl-16 pr-8 xl:pt-14 xl:pb-8 xl:pl-20 xl:pr-10 2xl:pt-16 2xl:pb-10 2xl:pl-[88px] 2xl:pr-12"
       >
         {/* Logo */}
         <motion.div
@@ -416,7 +416,10 @@ export default function LoginPage() {
               </AnimatePresence>
 
               {/* Form */}
-              <form onSubmit={handleLogin} className="mt-8 flex flex-col gap-5">
+              <form onSubmit={handleLogin} className="mt-8 flex flex-col gap-5" autoComplete="off">
+                {/* Hidden fields to prevent browser autofill */}
+                <input type="text" className="hidden" aria-hidden="true" tabIndex={-1} readOnly />
+                <input type="password" className="hidden" aria-hidden="true" tabIndex={-1} readOnly />
                 {/* Access Key */}
                 <motion.div variants={itemVariants} className="flex flex-col gap-2">
                   <label
@@ -433,42 +436,42 @@ export default function LoginPage() {
                       >
                         <Key size={16} />
                       </div>
-                      <input
-                        type={showAccessKey ? 'text' : 'password'}
-                        value={accessKey}
-                        onChange={(e) => setAccessKey(e.target.value)}
-                        placeholder="OXT-••••••••••••••••"
-                        required
-                        autoComplete="username"
-                        className="w-full bg-transparent text-[0.9375rem] outline-none"
-                        style={{
-                          padding: '21px 46px 21px 46px',
-                          color: 'rgba(255,255,255,0.9)',
-                          fontFamily: 'var(--font-mono, monospace)',
-                        }}
-                      />
-                      <motion.button
-                        type="button"
-                        onClick={() => setShowAccessKey(!showAccessKey)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center p-1.5 rounded-lg"
-                        style={{ color: 'rgba(255,255,255,0.2)' }}
-                        whileHover={{ color: 'rgba(255,255,255,0.5)' }}
-                        whileTap={{ scale: 0.9 }}
-                        tabIndex={-1}
-                        aria-label={showAccessKey ? 'Hide access key' : 'Show access key'}
-                      >
-                        <AnimatePresence mode="wait" initial={false}>
-                          <motion.div
-                            key={showAccessKey ? 'off' : 'on'}
-                            initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
-                            animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                            exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            {showAccessKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                          </motion.div>
-                        </AnimatePresence>
-                      </motion.button>
+                        <input
+                          type={showAccessKey ? 'text' : 'password'}
+                          value={accessKey}
+                          onChange={(e) => setAccessKey(e.target.value)}
+                          placeholder="OXT-••••••••••••••••"
+                          required
+                          autoComplete="off"
+                          className="w-full bg-transparent text-[0.9375rem] outline-none"
+                          style={{
+                            padding: '21px 46px 21px 46px',
+                            color: 'rgba(255,255,255,0.9)',
+                            fontFamily: 'var(--font-mono, monospace)',
+                          }}
+                        />
+                        <motion.button
+                          type="button"
+                          onClick={() => setShowAccessKey(!showAccessKey)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center p-1.5 rounded-lg"
+                          style={{ color: 'rgba(255,255,255,0.2)' }}
+                          whileHover={{ color: 'rgba(255,255,255,0.5)' }}
+                          whileTap={{ scale: 0.9 }}
+                          tabIndex={-1}
+                          aria-label={showAccessKey ? 'Hide access key' : 'Show access key'}
+                        >
+                          <AnimatePresence mode="wait" initial={false}>
+                            <motion.div
+                              key={showAccessKey ? 'off' : 'on'}
+                              initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                              exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              {showAccessKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </motion.div>
+                          </AnimatePresence>
+                        </motion.button>
                     </div>
                   </FocusWrapper>
                 </motion.div>
@@ -495,7 +498,7 @@ export default function LoginPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
                         required
-                        autoComplete="current-password"
+                        autoComplete="new-password"
                         className="w-full bg-transparent text-[0.9375rem] outline-none"
                         style={{
                           padding: '21px 46px 21px 46px',
@@ -680,10 +683,17 @@ export default function LoginPage() {
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus,
         input:-webkit-autofill:active {
+          -webkit-background-clip: text !important;
           -webkit-box-shadow: 0 0 0 1000px #0C1628 inset !important;
+          box-shadow: 0 0 0 1000px #0C1628 inset !important;
           -webkit-text-fill-color: rgba(255,255,255,0.9) !important;
           caret-color: rgba(255,255,255,0.9) !important;
           transition: background-color 5000s ease-in-out 0s !important;
+          animation: autofill-fix 0s forwards !important;
+        }
+        @keyframes autofill-fix {
+          from { background: #0C1628; }
+          to { background: #0C1628; }
         }
       `}</style>
     </div>
