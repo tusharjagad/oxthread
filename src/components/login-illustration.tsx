@@ -81,7 +81,11 @@ function Arrow({ x1, x2, y, index }: { x1: number; x2: number; y: number; index:
   const midX = (x1 + x2) / 2
   return (
     <g>
-      <line x1={x1 + 28} y1={y} x2={x2 - 28} y2={y} stroke={BLUE} strokeWidth={0.8} opacity={0.18} />
+      <motion.line
+        x1={x1 + 28} y1={y} x2={x2 - 28} y2={y} stroke={BLUE} strokeWidth={0.8}
+        animate={{ opacity: [0.12, 0.25, 0.12] }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: index * 0.3 }}
+      />
       <motion.polyline
         points={`${(x1 + x2) / 2 - 4},${y - 4} ${(x1 + x2) / 2 + 2},${y} ${(x1 + x2) / 2 - 4},${y + 4}`}
         fill="none"
@@ -98,21 +102,39 @@ function Arrow({ x1, x2, y, index }: { x1: number; x2: number; y: number; index:
 function PulseDot() {
   const cxValues = stages.map(s => s.x)
   return (
-    <motion.circle
-      r={4}
-      fill={CYAN}
-      opacity={0.85}
-      cx={cxValues[0]}
-      cy={160}
-      animate={{
-        cx: [...cxValues, ...cxValues.slice().reverse().slice(1, -1)],
-      }}
-      transition={{
-        duration: 8,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      }}
-    />
+    <>
+      {/* Pulse glow trail */}
+      <motion.circle
+        r={10}
+        fill={CYAN}
+        opacity={0.15}
+        cx={cxValues[0]}
+        cy={160}
+        animate={{
+          cx: [...cxValues, ...cxValues.slice().reverse().slice(1, -1)],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+      <motion.circle
+        r={4}
+        fill={CYAN}
+        opacity={0.9}
+        cx={cxValues[0]}
+        cy={160}
+        animate={{
+          cx: [...cxValues, ...cxValues.slice().reverse().slice(1, -1)],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+    </>
   )
 }
 
@@ -252,16 +274,14 @@ export default function LoginIllustration() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.8 }}
       >
-        <rect x={394} y={78} width={96} height={24} rx={6} fill="rgba(17,216,195,0.04)" stroke={CYAN} strokeWidth={0.6} strokeOpacity={0.2} />
-        <text x={442} y={93} textAnchor="middle" fill={CYAN} fontSize={9} fontFamily="system-ui, sans-serif" fontWeight={600} opacity={0.6}>
-          PRODUCTION →
+        <rect x={384} y={76} width={116} height={28} rx={8} fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.2)" strokeWidth={0.8} />
+        <motion.circle cx={398} cy={90} r={3} fill="#10B981" animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }} />
+        <text x={410} y={94} fill="#10B981" fontSize={9} fontFamily="system-ui, sans-serif" fontWeight={600} opacity={0.85}>
+          Production
         </text>
-        <motion.rect
-          x={394} y={78} width={0} height={24} rx={6}
-          fill={CYAN} opacity={0.04}
-          animate={{ width: [0, 96] }}
-          transition={{ duration: 2, delay: 1.5, ease: 'easeInOut' }}
-        />
+        <text x={482} y={94} textAnchor="end" fill="rgba(255,255,255,0.22)" fontSize={7.5} fontFamily="system-ui, sans-serif" fontWeight={500}>
+          Healthy
+        </text>
       </motion.g>
     </svg>
   )
