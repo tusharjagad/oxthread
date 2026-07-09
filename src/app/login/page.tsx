@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Lock, Eye, EyeOff, AlertTriangle, Key, ChevronRight } from '@/lib/icons'
@@ -15,7 +14,7 @@ const DARK_SURFACE = '#0F1728'
 
 function GridPattern() {
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.05 }}>
+    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.04 }}>
       <defs>
         <pattern id="g" width={48} height={48} patternUnits="userSpaceOnUse">
           <path d="M 48 0 L 0 0 0 48" fill="none" stroke={BRAND_BLUE} strokeWidth={0.5} />
@@ -32,16 +31,24 @@ function BackgroundGlow() {
       <div
         className="fixed pointer-events-none"
         style={{
-          width: '40vw', height: '40vw', top: '-15%', right: '-10%',
-          background: `radial-gradient(circle, rgba(36,107,255,0.08), transparent 70%)`,
+          width: '45vw', height: '45vw', top: '-20%', right: '-10%',
+          background: `radial-gradient(circle, rgba(36,107,255,0.1), transparent 70%)`,
           borderRadius: '50%',
         }}
       />
       <div
         className="fixed pointer-events-none"
         style={{
-          width: '30vw', height: '30vw', bottom: '-10%', left: '-5%',
-          background: `radial-gradient(circle, rgba(17,216,195,0.06), transparent 70%)`,
+          width: '35vw', height: '35vw', bottom: '-15%', left: '-8%',
+          background: `radial-gradient(circle, rgba(17,216,195,0.08), transparent 70%)`,
+          borderRadius: '50%',
+        }}
+      />
+      <div
+        className="fixed pointer-events-none"
+        style={{
+          width: '20vw', height: '20vw', top: '40%', left: '30%',
+          background: `radial-gradient(circle, rgba(36,107,255,0.04), transparent 70%)`,
           borderRadius: '50%',
         }}
       />
@@ -82,6 +89,18 @@ function ErrorAlert({ error, errorCode }: { error: string; errorCode: string }) 
   )
 }
 
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.06, delayChildren: 0.15 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+}
+
 export default function LoginPage() {
   const router = useRouter()
   const [accessKey, setAccessKey] = useState('')
@@ -92,9 +111,21 @@ export default function LoginPage() {
   const [errorCode, setErrorCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [particles, setParticles] = useState<{ left: string; top: string; w: number; h: number; bg: string; dur: string; delay: string }[]>([])
 
   useEffect(() => {
     setMounted(true)
+    setParticles(
+      Array.from({ length: 24 }).map(() => ({
+        left: `${5 + Math.random() * 90}%`,
+        top: `${-5 + Math.random() * 10}%`,
+        w: 1.5 + Math.random() * 2.5,
+        h: 1.5 + Math.random() * 2.5,
+        bg: `rgba(36, 107, 255, ${0.08 + Math.random() * 0.2})`,
+        dur: `${8 + Math.random() * 12}s`,
+        delay: `${Math.random() * 8}s`,
+      }))
+    )
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -137,18 +168,18 @@ export default function LoginPage() {
         <BackgroundGlow />
         {mounted && (
           <div className="absolute inset-0 overflow-hidden">
-            {Array.from({ length: 18 }).map((_, i) => (
+            {particles.map((p, i) => (
               <div
                 key={i}
                 className="absolute rounded-full"
                 style={{
-                  left: `${5 + Math.random() * 90}%`,
-                  top: `${-5 + Math.random() * 10}%`,
-                  width: 1.5 + Math.random() * 2,
-                  height: 1.5 + Math.random() * 2,
-                  background: `rgba(36, 107, 255, ${0.12 + Math.random() * 0.18})`,
-                  '--dur': `${6 + Math.random() * 10}s`,
-                  '--delay': `${Math.random() * 6}s`,
+                  left: p.left,
+                  top: p.top,
+                  width: p.w,
+                  height: p.h,
+                  background: p.bg,
+                  '--dur': p.dur,
+                  '--delay': p.delay,
                   animation: 'particle-float var(--dur) ease-in-out var(--delay) infinite',
                 } as React.CSSProperties}
               />
@@ -159,9 +190,9 @@ export default function LoginPage() {
 
       {/* ── Left Panel (40%) ── */}
       <motion.div
-        initial={{ opacity: 0, x: -30 }}
+        initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+        transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="hidden lg:flex flex-col w-[40%] min-h-screen relative z-10 p-10 xl:p-14 2xl:p-16"
       >
         {/* Logo */}
@@ -171,37 +202,43 @@ export default function LoginPage() {
           transition={{ delay: 0.15, duration: 0.5 }}
           className="flex items-center gap-3"
         >
-          <div
-            className="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg"
-            style={{ background: GRADIENT, boxShadow: '0 4px 20px rgba(36,107,255,0.25)' }}
+          <motion.div
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+            style={{ background: GRADIENT, boxShadow: '0 4px 24px rgba(36,107,255,0.3)' }}
           >
-            <span className="text-white font-bold text-xl tracking-tight">O</span>
+            <span className="text-white font-bold text-[22px] tracking-tight">O</span>
+          </motion.div>
+          <div>
+            <div className="font-semibold text-xl text-white/85 tracking-tight">
+              oxThread
+            </div>
+            <div className="text-[0.65rem] font-medium tracking-widest uppercase mt-0.5" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              Enterprise DevOps Automation Platform
+            </div>
           </div>
-          <span className="font-semibold text-lg text-white/85 tracking-tight">
-            oxThread
-          </span>
         </motion.div>
 
         {/* Hero */}
-        <div className="flex-1 flex flex-col justify-center -mt-16">
+        <div className="flex-1 flex flex-col justify-center -mt-[72px]">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.6 }}
           >
             <h1
-              className="font-bold leading-[1.08] tracking-tight"
+              className="font-bold leading-[1.1] tracking-tight"
               style={{
-                fontSize: 'clamp(48px, 5vw, 72px)',
+                fontSize: 'clamp(42px, 4.5vw, 60px)',
               }}
             >
               <span className="text-white/88">Automate.</span>
               <br />
               <span
+                className="bg-clip-text text-transparent"
                 style={{
-                  background: GRADIENT,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  backgroundImage: GRADIENT,
                 }}
               >
                 Deploy.
@@ -210,17 +247,16 @@ export default function LoginPage() {
               <span className="text-white/88">Monitor.</span>
               <br />
               <span
+                className="bg-clip-text text-transparent"
                 style={{
-                  background: GRADIENT,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  backgroundImage: GRADIENT,
                 }}
               >
                 Scale.
               </span>
             </h1>
             <p
-              className="mt-8 text-sm leading-relaxed max-w-sm"
+              className="mt-7 text-sm leading-relaxed max-w-sm"
               style={{ color: 'rgba(255,255,255,0.38)' }}
             >
               Streamline your DevOps lifecycle with intelligent automation, infrastructure orchestration, deployment pipelines, and real-time observability.
@@ -233,7 +269,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="pb-4"
+          className="pb-2"
         >
           <LoginIllustration />
         </motion.div>
@@ -243,7 +279,7 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
+        transition={{ duration: 0.6, delay: 0.15 }}
         className="flex-1 min-h-screen flex items-center justify-center relative z-10 p-5 sm:p-8"
         style={{ background: DARK_SURFACE }}
       >
@@ -257,26 +293,29 @@ export default function LoginPage() {
           <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: GRADIENT }}>
             <span className="text-white font-bold text-base">O</span>
           </div>
-          <span className="font-semibold text-base text-white/80">oxThread</span>
+          <div>
+            <span className="font-semibold text-base text-white/80">oxThread</span>
+          </div>
         </motion.div>
 
         {/* Login Card */}
         <motion.div
-          initial={{ opacity: 0, y: 24, scale: 0.97 }}
+          initial={{ opacity: 0, y: 30, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="w-full"
-          style={{ maxWidth: 520 }}
+          style={{ maxWidth: 560 }}
         >
           <div
             className="relative overflow-hidden"
             style={{
               borderRadius: 28,
-              background: 'rgba(15, 23, 40, 0.55)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              boxShadow: '0 30px 60px -15px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
+              background: 'rgba(15, 23, 40, 0.6)',
+              backdropFilter: 'blur(48px)',
+              WebkitBackdropFilter: 'blur(48px)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              boxShadow:
+                '0 40px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 40px rgba(36,107,255,0.04)',
               padding: 44,
             }}
           >
@@ -292,18 +331,27 @@ export default function LoginPage() {
               className="absolute pointer-events-none"
               style={{
                 width: '80px', height: '200px', top: '-20%', left: '10%',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), transparent)',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.04), transparent)',
                 transform: 'rotate(25deg)',
               }}
             />
+            {/* Subtle top line highlight */}
+            <div
+              className="absolute pointer-events-none"
+              style={{
+                width: '40%', height: '1px', top: 0, left: '30%',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
+              }}
+            />
 
-            <div style={{ position: 'relative', zIndex: 1 }}>
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              style={{ position: 'relative', zIndex: 1 }}
+            >
               {/* Card header */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
+              <motion.div variants={itemVariants}>
                 <h2 className="text-[22px] font-semibold text-white/90 tracking-tight">
                   Welcome back
                 </h2>
@@ -318,16 +366,16 @@ export default function LoginPage() {
               {/* Error */}
               <AnimatePresence mode="wait">
                 {error && (
-                  <div className="mt-6">
+                  <motion.div variants={itemVariants} className="mt-6">
                     <ErrorAlert error={error} errorCode={errorCode} />
-                  </div>
+                  </motion.div>
                 )}
               </AnimatePresence>
 
               {/* Form */}
               <form onSubmit={handleLogin} className="mt-8 flex flex-col gap-5">
                 {/* Access Key */}
-                <div className="flex flex-col gap-2">
+                <motion.div variants={itemVariants} className="flex flex-col gap-2">
                   <label
                     className="text-[0.8125rem] font-medium tracking-wide"
                     style={{ color: 'rgba(255,255,255,0.5)' }}
@@ -351,17 +399,17 @@ export default function LoginPage() {
                         autoComplete="username"
                         className="w-full bg-transparent text-[0.9375rem] outline-none"
                         style={{
-                          padding: '14px 16px 14px 46px',
+                          padding: '17px 16px 17px 46px',
                           color: 'rgba(255,255,255,0.9)',
                           fontFamily: 'var(--font-mono, monospace)',
                         }}
                       />
                     </div>
                   </FocusWrapper>
-                </div>
+                </motion.div>
 
                 {/* Password */}
-                <div className="flex flex-col gap-2">
+                <motion.div variants={itemVariants} className="flex flex-col gap-2">
                   <label
                     className="text-[0.8125rem] font-medium tracking-wide"
                     style={{ color: 'rgba(255,255,255,0.5)' }}
@@ -385,28 +433,38 @@ export default function LoginPage() {
                         autoComplete="current-password"
                         className="w-full bg-transparent text-[0.9375rem] outline-none"
                         style={{
-                          padding: '14px 46px 14px 46px',
+                          padding: '17px 46px 17px 46px',
                           color: 'rgba(255,255,255,0.9)',
                         }}
                       />
-                      <button
+                      <motion.button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center p-1.5 rounded-lg transition-colors"
                         style={{ color: 'rgba(255,255,255,0.2)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}
+                        whileHover={{ color: 'rgba(255,255,255,0.5)' }}
+                        whileTap={{ scale: 0.9 }}
                         tabIndex={-1}
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.div
+                            key={showPassword ? 'off' : 'on'}
+                            initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                            animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                            exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </motion.div>
+                        </AnimatePresence>
+                      </motion.button>
                     </div>
                   </FocusWrapper>
-                </div>
+                </motion.div>
 
                 {/* Remember + Forgot */}
-                <div className="flex items-center justify-between mt-1">
+                <motion.div variants={itemVariants} className="flex items-center justify-between mt-1">
                   <label className="flex items-center gap-2.5 cursor-pointer group select-none">
                     <div
                       className="w-[18px] h-[18px] rounded-[5px] flex items-center justify-center transition-all duration-150"
@@ -430,60 +488,70 @@ export default function LoginPage() {
                       Remember me
                     </span>
                   </label>
-                  <button
+                  <motion.button
                     type="button"
                     className="text-[0.8125rem] font-medium transition-colors"
                     style={{ color: 'rgba(36,107,255,0.6)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = BRAND_BLUE}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(36,107,255,0.6)'}
+                    whileHover={{ color: BRAND_BLUE }}
+                    tabIndex={-1}
                   >
                     Forgot password?
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
 
                 {/* Sign In */}
-                <motion.button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2.5 py-[14px] rounded-xl font-semibold text-[0.9375rem] text-white relative overflow-hidden"
-                  style={{
-                    background: GRADIENT,
-                    boxShadow: '0 6px 24px rgba(36,107,255,0.25)',
-                  }}
-                  whileHover={!loading ? {
-                    scale: 1.01,
-                    boxShadow: '0 8px 32px rgba(36,107,255,0.35)',
-                  } : {}}
-                  whileTap={!loading ? { scale: 0.98 } : {}}
-                >
-                  {loading && (
-                    <motion.div
-                      className="absolute inset-0"
-                      style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)' }}
-                      animate={{ x: ['-100%', '100%'] }}
-                      transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
-                    />
-                  )}
-                  {loading ? (
-                    <div className="w-[18px] h-[18px] border-[2px] border-white/25 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Lock size={16} />
-                      Sign In
-                      <ChevronRight size={16} className="opacity-50" />
-                    </>
-                  )}
-                </motion.button>
+                <motion.div variants={itemVariants}>
+                  <motion.button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full flex items-center justify-center gap-2.5 py-[15px] rounded-xl font-semibold text-[0.9375rem] text-white relative overflow-hidden cursor-pointer"
+                    style={{
+                      background: GRADIENT,
+                      boxShadow: '0 6px 24px rgba(36,107,255,0.25)',
+                    }}
+                    whileHover={!loading ? {
+                      scale: 1.01,
+                      y: -1,
+                      boxShadow: '0 10px 36px rgba(36,107,255,0.35)',
+                    } : {}}
+                    whileTap={!loading ? { scale: 0.98 } : {}}
+                  >
+                    {loading && (
+                      <motion.div
+                        className="absolute inset-0"
+                        style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent)' }}
+                        animate={{ x: ['-100%', '100%'] }}
+                        transition={{ duration: 1.2, repeat: Infinity, ease: 'linear' }}
+                      />
+                    )}
+                    {loading ? (
+                      <div className="w-[18px] h-[18px] border-[2px] border-white/25 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <motion.span className="flex items-center gap-2.5" whileHover={{ gap: 14 }}>
+                        <Lock size={16} />
+                        Sign In
+                        <motion.span
+                          animate={{ x: [0, 3, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                        >
+                          <ChevronRight size={16} className="opacity-50" />
+                        </motion.span>
+                      </motion.span>
+                    )}
+                  </motion.button>
+                </motion.div>
               </form>
 
               {/* Footer */}
-              <p
-                className="mt-10 text-center text-xs tracking-wide"
-                style={{ color: 'rgba(255,255,255,0.15)' }}
+              <motion.div
+                variants={itemVariants}
+                className="mt-10 text-center"
               >
-                OxThread v0.1.0
-              </p>
-            </div>
+                <p className="text-[0.675rem] tracking-wider" style={{ color: 'rgba(255,255,255,0.12)' }}>
+                  &copy; 2026 oxThread — Enterprise DevOps Automation — v1.0.0
+                </p>
+              </motion.div>
+            </motion.div>
           </div>
         </motion.div>
       </motion.div>
