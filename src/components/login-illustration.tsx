@@ -159,20 +159,36 @@ function PipelineGlow() {
 
 function PipelineTitle() {
   return (
-    <motion.text
-      x={260}
-      y={78}
-      textAnchor="middle"
-      fill="rgba(255,255,255,0.12)"
-      fontSize={10}
-      fontFamily="ui-monospace, SFMono-Regular, monospace"
-      letterSpacing={4}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, delay: 0.5 }}
-    >
-      CI/CD PIPELINE
-    </motion.text>
+    <>
+      <motion.text
+        x={260}
+        y={78}
+        textAnchor="middle"
+        fill="rgba(255,255,255,0.12)"
+        fontSize={10}
+        fontFamily="ui-monospace, SFMono-Regular, monospace"
+        letterSpacing={4}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.5 }}
+      >
+        CI/CD PIPELINE
+      </motion.text>
+      <motion.text
+        x={260}
+        y={90}
+        textAnchor="middle"
+        fill="rgba(255,255,255,0.07)"
+        fontSize={7.5}
+        fontFamily="system-ui, sans-serif"
+        letterSpacing={2}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.7 }}
+      >
+        Live Deployment Flow
+      </motion.text>
+    </>
   )
 }
 

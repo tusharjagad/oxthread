@@ -204,7 +204,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="hidden lg:flex flex-col w-[40%] min-h-screen relative z-10 p-10 xl:p-14 2xl:p-16"
+        className="hidden lg:flex flex-col w-[44%] min-h-screen relative z-10 pl-14 pr-8 xl:pl-16 xl:pr-10 2xl:pl-[72px] 2xl:pr-12"
       >
         {/* Logo */}
         <motion.div
@@ -237,6 +237,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.6 }}
+            className="mb-12"
           >
             <h1
               className="font-bold leading-[1.1] tracking-tight"
@@ -267,7 +268,7 @@ export default function LoginPage() {
               </span>
             </h1>
             <p
-              className="mt-7 text-sm leading-relaxed max-w-sm"
+              className="mt-8 text-sm leading-relaxed max-w-sm"
               style={{ color: 'rgba(255,255,255,0.38)' }}
             >
               Streamline your DevOps lifecycle with intelligent automation, infrastructure orchestration, deployment pipelines, and real-time observability.
@@ -332,7 +333,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="w-full"
+          className="w-full mt-6 lg:mt-8"
           style={{ maxWidth: 560 }}
         >
           <div
@@ -340,8 +341,8 @@ export default function LoginPage() {
             style={{
               borderRadius: 28,
               background: 'rgba(15, 23, 40, 0.6)',
-              backdropFilter: 'blur(48px)',
-              WebkitBackdropFilter: 'blur(48px)',
+              backdropFilter: 'blur(64px)',
+              WebkitBackdropFilter: 'blur(64px)',
               border: '1px solid rgba(255,255,255,0.12)',
               boxShadow:
                 '0 50px 100px -24px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 60px rgba(36,107,255,0.05), 0 0 2px rgba(17,216,195,0.06)',
@@ -436,7 +437,7 @@ export default function LoginPage() {
                         type={showAccessKey ? 'text' : 'password'}
                         value={accessKey}
                         onChange={(e) => setAccessKey(e.target.value)}
-                        placeholder="OXT-..."
+                        placeholder="OXT-••••••••••••••••"
                         required
                         autoComplete="username"
                         className="w-full bg-transparent text-[0.9375rem] outline-none"
@@ -647,15 +648,15 @@ export default function LoginPage() {
               </form>
 
               {/* Footer */}
-              <div className="mt-10 pt-5 text-center border-t border-white/[0.03]">
+              <div className="mt-14 pt-5 text-center border-t border-white/[0.03]">
                 <motion.div variants={itemVariants}>
-                  <p className="text-[0.65rem] tracking-wider" style={{ color: 'rgba(255,255,255,0.12)' }}>
+                  <p className="text-[0.65rem] tracking-wider" style={{ color: 'rgba(255,255,255,0.15)' }}>
                     &copy; 2026 oxThread
                   </p>
-                  <p className="text-[0.58rem] tracking-wider mt-1.5" style={{ color: 'rgba(255,255,255,0.07)' }}>
+                  <p className="text-[0.58rem] tracking-wider mt-1.5" style={{ color: 'rgba(255,255,255,0.1)' }}>
                     Enterprise DevOps Automation
                   </p>
-                  <p className="text-[0.55rem] tracking-wider mt-1" style={{ color: 'rgba(255,255,255,0.05)' }}>
+                  <p className="text-[0.55rem] tracking-wider mt-1" style={{ color: 'rgba(255,255,255,0.07)' }}>
                     Version 1.0.0
                   </p>
                 </motion.div>
@@ -673,11 +674,16 @@ export default function LoginPage() {
           100% { transform: translateY(calc(-100vh - 20px)) translateX(calc(var(--drift, 0px))); opacity: 0; }
         }
         input::placeholder {
-          color: rgba(255,255,255,0.2) !important;
+          color: rgba(255,255,255,0.25) !important;
         }
-        input:-webkit-autofill {
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
           -webkit-box-shadow: 0 0 0 1000px #0C1628 inset !important;
           -webkit-text-fill-color: rgba(255,255,255,0.9) !important;
+          caret-color: rgba(255,255,255,0.9) !important;
+          transition: background-color 5000s ease-in-out 0s !important;
         }
       `}</style>
     </div>
@@ -695,7 +701,7 @@ function FocusWrapper({ children }: { children: React.ReactNode }) {
         border: `1px solid ${focused ? 'rgba(36,107,255,0.4)' : 'rgba(255,255,255,0.06)'}`,
         boxShadow: focused ? '0 0 0 2px rgba(36,107,255,0.25), 0 0 30px rgba(36,107,255,0.1)' : 'none',
       }}
-      animate={{ y: hovered && !focused ? -1 : 0 }}
+      animate={{ y: hovered || focused ? -1 : 0 }}
       transition={{ duration: 0.2 }}
       onFocusCapture={() => setFocused(true)}
       onBlurCapture={() => setFocused(false)}
