@@ -106,7 +106,9 @@ export default function LoginPage() {
   const [accessKey, setAccessKey] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showAccessKey, setShowAccessKey] = useState(false)
   const [remember, setRemember] = useState(false)
+  const [tapCount, setTapCount] = useState(0)
   const [error, setError] = useState('')
   const [errorCode, setErrorCode] = useState('')
   const [loading, setLoading] = useState(false)
@@ -313,10 +315,10 @@ export default function LoginPage() {
               background: 'rgba(15, 23, 40, 0.6)',
               backdropFilter: 'blur(48px)',
               WebkitBackdropFilter: 'blur(48px)',
-              border: '1px solid rgba(255,255,255,0.07)',
+              border: '1px solid rgba(255,255,255,0.12)',
               boxShadow:
-                '0 40px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 40px rgba(36,107,255,0.04)',
-              padding: 44,
+                '0 40px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 40px rgba(36,107,255,0.04)',
+              padding: '48px 48px 40px',
             }}
           >
             {/* Glass reflection */}
@@ -352,12 +354,12 @@ export default function LoginPage() {
             >
               {/* Card header */}
               <motion.div variants={itemVariants}>
-                <h2 className="text-[22px] font-semibold text-white/90 tracking-tight">
-                  Welcome back
+                <h2 className="text-[40px] font-bold leading-[1.1] tracking-tight text-white/90">
+                  Welcome Back
                 </h2>
                 <p
-                  className="mt-2.5 text-sm"
-                  style={{ color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}
+                  className="mt-3"
+                  style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, lineHeight: 1.5 }}
                 >
                   Sign in to your account to continue
                 </p>
@@ -377,8 +379,8 @@ export default function LoginPage() {
                 {/* Access Key */}
                 <motion.div variants={itemVariants} className="flex flex-col gap-2">
                   <label
-                    className="text-[0.8125rem] font-medium tracking-wide"
-                    style={{ color: 'rgba(255,255,255,0.5)' }}
+                    className="text-[0.8125rem] font-semibold tracking-wide"
+                    style={{ color: 'rgba(255,255,255,0.85)' }}
                   >
                     Access Key
                   </label>
@@ -391,7 +393,7 @@ export default function LoginPage() {
                         <Key size={16} />
                       </div>
                       <input
-                        type="text"
+                        type={showAccessKey ? 'text' : 'password'}
                         value={accessKey}
                         onChange={(e) => setAccessKey(e.target.value)}
                         placeholder="OXT-..."
@@ -399,11 +401,33 @@ export default function LoginPage() {
                         autoComplete="username"
                         className="w-full bg-transparent text-[0.9375rem] outline-none"
                         style={{
-                          padding: '17px 16px 17px 46px',
+                          padding: '19px 46px 19px 46px',
                           color: 'rgba(255,255,255,0.9)',
                           fontFamily: 'var(--font-mono, monospace)',
                         }}
                       />
+                      <motion.button
+                        type="button"
+                        onClick={() => setShowAccessKey(!showAccessKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center p-1.5 rounded-lg"
+                        style={{ color: 'rgba(255,255,255,0.2)' }}
+                        whileHover={{ color: 'rgba(255,255,255,0.5)' }}
+                        whileTap={{ scale: 0.9 }}
+                        tabIndex={-1}
+                        aria-label={showAccessKey ? 'Hide access key' : 'Show access key'}
+                      >
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.div
+                            key={showAccessKey ? 'off' : 'on'}
+                            initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                            animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                            exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {showAccessKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </motion.div>
+                        </AnimatePresence>
+                      </motion.button>
                     </div>
                   </FocusWrapper>
                 </motion.div>
@@ -411,8 +435,8 @@ export default function LoginPage() {
                 {/* Password */}
                 <motion.div variants={itemVariants} className="flex flex-col gap-2">
                   <label
-                    className="text-[0.8125rem] font-medium tracking-wide"
-                    style={{ color: 'rgba(255,255,255,0.5)' }}
+                    className="text-[0.8125rem] font-semibold tracking-wide"
+                    style={{ color: 'rgba(255,255,255,0.85)' }}
                   >
                     Password
                   </label>
@@ -433,7 +457,7 @@ export default function LoginPage() {
                         autoComplete="current-password"
                         className="w-full bg-transparent text-[0.9375rem] outline-none"
                         style={{
-                          padding: '17px 46px 17px 46px',
+                          padding: '19px 46px 19px 46px',
                           color: 'rgba(255,255,255,0.9)',
                         }}
                       />
@@ -491,11 +515,13 @@ export default function LoginPage() {
                   <motion.button
                     type="button"
                     className="text-[0.8125rem] font-medium transition-colors"
-                    style={{ color: 'rgba(36,107,255,0.6)' }}
+                    style={{ color: 'rgba(36,107,255,0.5)' }}
                     whileHover={{ color: BRAND_BLUE }}
                     tabIndex={-1}
                   >
-                    Forgot password?
+                    <span className="hover:underline underline-offset-2 decoration-blue-500/30">
+                      Forgot password?
+                    </span>
                   </motion.button>
                 </motion.div>
 
@@ -504,6 +530,7 @@ export default function LoginPage() {
                   <motion.button
                     type="submit"
                     disabled={loading}
+                    onTap={() => setTapCount(c => c + 1)}
                     className="w-full flex items-center justify-center gap-2.5 py-[15px] rounded-xl font-semibold text-[0.9375rem] text-white relative overflow-hidden cursor-pointer"
                     style={{
                       background: GRADIENT,
@@ -527,8 +554,24 @@ export default function LoginPage() {
                     {loading ? (
                       <div className="w-[18px] h-[18px] border-[2px] border-white/25 border-t-white rounded-full animate-spin" />
                     ) : (
-                      <motion.span className="flex items-center gap-2.5" whileHover={{ gap: 14 }}>
-                        <Lock size={16} />
+                      <motion.span className="flex items-center gap-2.5 relative" whileHover={{ gap: 14 }}>
+                        {/* Ripple */}
+                        <AnimatePresence mode="popLayout">
+                          {tapCount > 0 && (
+                            <motion.span
+                              key={tapCount}
+                              className="absolute inset-0 rounded-xl pointer-events-none"
+                              initial={{ scale: 0, opacity: 0.3 }}
+                              animate={{ scale: 2.5, opacity: 0 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.5, ease: 'easeOut' }}
+                              style={{ background: 'rgba(255,255,255,0.08)' }}
+                            />
+                          )}
+                        </AnimatePresence>
+                        <motion.span whileHover={{ rotate: -8 }}>
+                          <Lock size={16} />
+                        </motion.span>
                         Sign In
                         <motion.span
                           animate={{ x: [0, 3, 0] }}
@@ -543,14 +586,16 @@ export default function LoginPage() {
               </form>
 
               {/* Footer */}
-              <motion.div
-                variants={itemVariants}
-                className="mt-10 text-center"
-              >
-                <p className="text-[0.675rem] tracking-wider" style={{ color: 'rgba(255,255,255,0.12)' }}>
-                  &copy; 2026 oxThread — Enterprise DevOps Automation — v1.0.0
-                </p>
-              </motion.div>
+              <div className="mt-10 pt-5 text-center border-t border-white/[0.04]">
+                <motion.div variants={itemVariants}>
+                  <p className="text-[0.65rem] tracking-wider" style={{ color: 'rgba(255,255,255,0.12)' }}>
+                    &copy; 2026 oxThread
+                  </p>
+                  <p className="text-[0.6rem] tracking-wider mt-1" style={{ color: 'rgba(255,255,255,0.08)' }}>
+                    Version 0.1.0
+                  </p>
+                </motion.div>
+              </div>
             </motion.div>
           </div>
         </motion.div>
@@ -570,18 +615,23 @@ export default function LoginPage() {
 
 function FocusWrapper({ children }: { children: React.ReactNode }) {
   const [focused, setFocused] = useState(false)
+  const [hovered, setHovered] = useState(false)
   return (
-    <div
+    <motion.div
       className="rounded-xl transition-all duration-200"
       style={{
-        background: 'rgba(255,255,255,0.03)',
+        background: '#0C1628',
         border: `1px solid ${focused ? 'rgba(36,107,255,0.4)' : 'rgba(255,255,255,0.06)'}`,
         boxShadow: focused ? '0 0 0 2px rgba(36,107,255,0.15), 0 0 24px rgba(36,107,255,0.06)' : 'none',
       }}
+      animate={{ y: hovered && !focused ? -1 : 0 }}
+      transition={{ duration: 0.2 }}
       onFocusCapture={() => setFocused(true)}
       onBlurCapture={() => setFocused(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {children}
-    </div>
+    </motion.div>
   )
 }
