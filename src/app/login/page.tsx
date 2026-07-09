@@ -416,10 +416,7 @@ export default function LoginPage() {
               </AnimatePresence>
 
               {/* Form */}
-              <form onSubmit={handleLogin} className="mt-8 flex flex-col gap-5" autoComplete="off">
-                {/* Hidden fields to prevent browser autofill */}
-                <input type="text" className="hidden" aria-hidden="true" tabIndex={-1} readOnly />
-                <input type="password" className="hidden" aria-hidden="true" tabIndex={-1} readOnly />
+              <form onSubmit={handleLogin} className="mt-8 flex flex-col gap-5">
                 {/* Access Key */}
                 <motion.div variants={itemVariants} className="flex flex-col gap-2">
                   <label
@@ -442,7 +439,7 @@ export default function LoginPage() {
                           onChange={(e) => setAccessKey(e.target.value)}
                           placeholder="OXT-••••••••••••••••"
                           required
-                          autoComplete="off"
+                          autoComplete="username"
                           className="w-full bg-transparent text-[0.9375rem] outline-none"
                           style={{
                             padding: '21px 46px 21px 46px',
@@ -498,7 +495,7 @@ export default function LoginPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
                         required
-                        autoComplete="new-password"
+                        autoComplete="current-password"
                         className="w-full bg-transparent text-[0.9375rem] outline-none"
                         style={{
                           padding: '21px 46px 21px 46px',
