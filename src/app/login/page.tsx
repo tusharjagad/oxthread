@@ -106,7 +106,6 @@ export default function LoginPage() {
   const [accessKey, setAccessKey] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [showAccessKey, setShowAccessKey] = useState(false)
   const [remember, setRemember] = useState(false)
   const [tapCount, setTapCount] = useState(0)
   const [error, setError] = useState('')
@@ -204,7 +203,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="hidden lg:flex flex-col w-[44%] min-h-screen relative z-10 pt-10 pb-6 pl-16 pr-8 xl:pt-14 xl:pb-8 xl:pl-20 xl:pr-10 2xl:pt-16 2xl:pb-10 2xl:pl-[88px] 2xl:pr-12"
+        className="hidden lg:flex flex-col w-[44%] min-h-screen relative z-10 pt-10 pb-6 pl-20 pr-10 xl:pt-14 xl:pb-8 xl:pl-24 xl:pr-12 2xl:pt-16 2xl:pb-10 2xl:pl-[96px] 2xl:pr-14"
       >
         {/* Logo */}
         <motion.div
@@ -434,7 +433,7 @@ export default function LoginPage() {
                         <Key size={16} />
                       </div>
                         <input
-                          type={showAccessKey ? 'text' : 'password'}
+                          type="text"
                           value={accessKey}
                           onChange={(e) => setAccessKey(e.target.value)}
                           placeholder="OXT-••••••••••••••••"
@@ -442,33 +441,11 @@ export default function LoginPage() {
                           autoComplete="username"
                           className="w-full bg-transparent text-[0.9375rem] outline-none"
                           style={{
-                            padding: '21px 46px 21px 46px',
+                            padding: '21px 16px 21px 46px',
                             color: 'rgba(255,255,255,0.9)',
                             fontFamily: 'var(--font-mono, monospace)',
                           }}
                         />
-                        <motion.button
-                          type="button"
-                          onClick={() => setShowAccessKey(!showAccessKey)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center p-1.5 rounded-lg"
-                          style={{ color: 'rgba(255,255,255,0.2)' }}
-                          whileHover={{ color: 'rgba(255,255,255,0.5)' }}
-                          whileTap={{ scale: 0.9 }}
-                          tabIndex={-1}
-                          aria-label={showAccessKey ? 'Hide access key' : 'Show access key'}
-                        >
-                          <AnimatePresence mode="wait" initial={false}>
-                            <motion.div
-                              key={showAccessKey ? 'off' : 'on'}
-                              initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
-                              animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                              exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              {showAccessKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </motion.div>
-                          </AnimatePresence>
-                        </motion.button>
                     </div>
                   </FocusWrapper>
                 </motion.div>
