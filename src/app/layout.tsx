@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import { AuthProvider } from '@/contexts/auth-context'
 
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
   keywords: ['DevOps', 'Self-Service', 'Azure', 'CI/CD', 'PostgreSQL', 'Infrastructure'],
   authors: [{ name: 'OxThread' }],
   robots: 'noindex, nofollow',
+  icons: { icon: '/icon.png' },
 }
 
 export default function RootLayout({
@@ -33,19 +35,18 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{
-          __html: `
+      <head />
+      <body>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`
             (function() {
               try {
                 var theme = localStorage.getItem('oxthread-theme') || 'dark';
                 document.documentElement.classList.add(theme);
               } catch(e) {}
             })();
-          `,
-        }} />
-      </head>
-      <body>
+          `}
+        </Script>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

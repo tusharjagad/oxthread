@@ -12,7 +12,7 @@
 - **Create Database UI** (`/dashboard/postgresql/databases`) — inline modal with server selection, database name, optional owner field; refreshes table on creation.
 
 ### Changed
-- **Login page redesigned** (`/app/login/page.tsx`) — removed all animated blobs, floating particles, 3D tilt, emoji icons, conic gradient rings, and glass morphism. Replaced with clean, minimal, professional card layout using standard form inputs and `@/lib/icons`.
+- **Login page premium redesign** (`/app/login/page.tsx`) — 40/60 split layout with left branding panel and right login card. Premium glassmorphism card (28px border-radius, 32px blur, deeper shadow, 44px padding, 520px width). Blue→Cyan gradient button with glow. Clamp-based headline sizing (48-72px). Better spaced typography, improved form inputs with focus glow. Premium DevOps SVG illustration with CI/CD, K8s, Docker, monitoring, shield, AI nodes, animated pulse rings. Subtle radial gradient background glows, 18 floating particles with CSS custom property timing. All existing auth functionality preserved.
 - **Password generation** (`src/lib/postgres/provisioning.ts`) — `generatePassword()` now uses only alphanumeric characters (no special chars) for database compatibility.
 
 ### Fixed
