@@ -256,9 +256,11 @@ export async function getAdvisorRecommendations(): Promise<Recommendation[]> {
     return (data.value || []).map((rec: Record<string, unknown>) => {
       const props = rec.properties as Record<string, unknown> || {}
       const extended = props.extendedProperties as Record<string, string> | undefined || {}
+      const resId = (props.resourceMetadata as Record<string, string> | undefined)?.resourceId || ''
+      const nameFromId = resId ? resId.split('/').pop() || resId : ''
       return {
-        resourceId: (props.resourceMetadata as Record<string, string> | undefined)?.resourceId || '',
-        resourceName: extended.resourceName || (rec.id as string || '').split('/').pop() || '',
+        resourceId: resId,
+        resourceName: extended.resourceName || nameFromId,
         recommendationType: (props.recommendationTypeId as string || '').split('/').pop() || 'general',
         impact: Math.max(0, parseFloat(String(props.impactedValue || '0'))) || 0,
         currency: 'USD',

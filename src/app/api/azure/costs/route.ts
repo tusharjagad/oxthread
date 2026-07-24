@@ -9,12 +9,18 @@ export async function GET(request: NextRequest) {
   if (!auth.ok) return auth.response
 
   try {
-    const currentMonth = await queryMonthlyCost('ThisMonth')
-    const lastMonth = await queryMonthlyCost('LastMonth')
-    const forecast = await getForecast()
+    const [currentMonth, lastMonth, forecast] = await Promise.all([
+      queryMonthlyCost('ThisMonth').catch(() => null),
+      queryMonthlyCost('LastMonth').catch(() => null),
+      getForecast().catch(() => null),
+    ])
+
+    if (!currentMonth) {
+      return NextResponse.json({ error: 'Cost data unavailable. Verify Azure credentials and permissions.' }, { status: 502 })
+    }
 
     const currentTotal = currentMonth.totalCost
-    const lastTotal = lastMonth.totalCost
+    const lastTotal = lastMonth?.totalCost ?? 0
     const change = lastTotal > 0 ? ((currentTotal - lastTotal) / lastTotal) * 100 : 0
 
     return NextResponse.json({

@@ -26,12 +26,13 @@ export async function runCostAnalysis(): Promise<{ alerts: AlertCandidate[] }> {
       alerts.push({
         type: 'cost_spike',
         severity: inc.changePercent > 150 ? 'critical' : inc.changePercent > 80 ? 'high' : 'medium',
-        title: `Cost hike: ${inc.resourceName}`,
-        description: `${inc.resourceName} (${inc.resourceType}) cost jumped from $${inc.previousCost.toFixed(2)} to $${inc.currentCost.toFixed(2)} — a ${inc.changePercent.toFixed(0)}% increase.`,
+        title: `Cost hike (monthly): ${inc.resourceName}`,
+        description: `${inc.resourceName} (${inc.resourceType}) cost jumped $${inc.previousCost.toFixed(2)} → $${inc.currentCost.toFixed(2)} this month (${inc.changePercent.toFixed(0)}% increase). Compared: previous full month vs current month-to-date.`,
         resourceName: inc.resourceName,
         metricValue: inc.currentCost,
         threshold: inc.previousCost,
         metadata: {
+          window: 'month-over-month',
           changePercent: inc.changePercent,
           previousCost: inc.previousCost,
           resourceType: inc.resourceType,
@@ -48,11 +49,12 @@ export async function runCostAnalysis(): Promise<{ alerts: AlertCandidate[] }> {
         type: 'unused_resource',
         severity: r.monthlyCost > 50 ? 'high' : r.monthlyCost > 20 ? 'medium' : 'low',
         title: `Idle resource: ${r.resourceName}`,
-        description: `${r.resourceName} (${r.resourceType}) costs $${r.monthlyCost.toFixed(2)}/mo with only ${r.costVariance.toFixed(1)}% month-over-month variance — appears always-on but underutilized.`,
+        description: `${r.resourceName} (${r.resourceType}) costs $${r.monthlyCost.toFixed(2)}/mo with only ${r.costVariance.toFixed(1)}% cost variance across months. Resource is always-on but appears underutilized — investigate rightsizing or shutdown.`,
         resourceName: r.resourceName,
         metricValue: r.monthlyCost,
         threshold: r.lastMonthCost,
         metadata: {
+          window: 'month-over-month',
           resourceType: r.resourceType,
           costVariance: r.costVariance,
           lastMonthCost: r.lastMonthCost,
@@ -62,7 +64,7 @@ export async function runCostAnalysis(): Promise<{ alerts: AlertCandidate[] }> {
     }
   } catch {}
 
-  // ── 3. Overall daily cost spikes ──
+  // ── 3. Daily cost spike (today vs 14-day rolling average) ──
   try {
     const snapshots = await prisma.azureCostSnapshot.findMany({
       orderBy: { date: 'asc' },
@@ -82,11 +84,12 @@ export async function runCostAnalysis(): Promise<{ alerts: AlertCandidate[] }> {
         alerts.push({
           type: 'daily_spike',
           severity: recent.cost > avg * 2 ? 'critical' : 'high',
-          title: 'Overall daily cost spike detected',
-          description: `Total cost on ${recent.date.toISOString().split('T')[0]} hit $${recent.cost.toFixed(2)} vs 14-day avg of $${avg.toFixed(2)} (${((recent.cost - avg) / avg * 100).toFixed(0)}% spike).`,
+          title: 'Daily cost spike',
+          description: `Total cost spiked to $${recent.cost.toFixed(2)} on ${recent.date.toISOString().split('T')[0]}. That's ${((recent.cost - avg) / avg * 100).toFixed(0)}% above the 14-day average of $${avg.toFixed(2)}. Compare: yesterday's cost vs rolling 14-day average.`,
           metricValue: recent.cost,
           threshold: Math.round(threshold * 100) / 100,
           metadata: {
+            window: 'daily-vs-14day-avg',
             averageCost: Math.round(avg * 100) / 100,
             dailyCosts: days.map((d) => ({ date: d.date.toISOString().split('T')[0], cost: d.cost })),
           },
@@ -107,11 +110,11 @@ export async function runCostAnalysis(): Promise<{ alerts: AlertCandidate[] }> {
         alerts.push({
           type: 'new_resource',
           severity: r.cost > 100 ? 'high' : 'medium',
-          title: `New resource detected: ${r.resourceName}`,
-          description: `${r.resourceName} (${r.resourceType}) appeared this month costing $${r.cost.toFixed(2)} so far. Verify this was intentionally provisioned.`,
+          title: `New resource: ${r.resourceName}`,
+          description: `${r.resourceName} (${r.resourceType}) appeared this month costing $${r.cost.toFixed(2)} so far. Not present last month. Verify this was intentionally provisioned.`,
           resourceName: r.resourceName,
           metricValue: r.cost,
-          metadata: { resourceType: r.resourceType },
+          metadata: { window: 'month-over-month', resourceType: r.resourceType },
         })
       }
     }

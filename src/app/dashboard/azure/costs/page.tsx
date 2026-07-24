@@ -112,6 +112,7 @@ export default function AzureCostManagementPage() {
   const [loading, setLoading] = useState(true)
   const [dismissingId, setDismissingId] = useState<string | null>(null)
   const [alertActionId, setAlertActionId] = useState<string | null>(null)
+  const [showAllAlerts, setShowAllAlerts] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -205,52 +206,60 @@ export default function AzureCostManagementPage() {
       </div>
 
       {alerts.length > 0 && (
-        <div className="card" style={{ marginBottom: '1.25rem', animation: 'fadeSlideUp 0.5s ease-out 0.1s both', borderLeft: '3px solid #f59e0b' }}>
+        <div className="card" style={{ marginBottom: '1.25rem', animation: 'fadeSlideUp 0.5s ease-out 0.1s both' }}>
           <div className="flex items-center justify-between mb-3">
             <h2 style={{ fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Activity size={16} style={{ color: '#f59e0b' }} />
               AI Monitoring Alerts
             </h2>
-            <span className="badge badge-warning">{alerts.length} active</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span className="badge badge-warning">{alerts.length} active</span>
+              {alerts.length > 5 && (
+                <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.7rem' }}
+                  onClick={() => setShowAllAlerts(!showAllAlerts)}>
+                  {showAllAlerts ? 'Show less' : `Show all ${alerts.length}`}
+                </button>
+              )}
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {alerts.map((alert) => {
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            {(showAllAlerts ? alerts : alerts.slice(0, 5)).map((alert) => {
               const Icon = ALERT_ICONS[alert.type] || AlertTriangle
               const color = ALERT_COLORS[alert.severity] || '#6b7280'
               return (
                 <div key={alert.id} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
-                  padding: '0.65rem 0.75rem', borderRadius: 8,
-                  background: 'var(--bg-elevated)', fontSize: '0.85rem',
+                  display: 'flex', alignItems: 'flex-start', gap: '0.6rem',
+                  padding: '0.5rem 0.65rem', borderRadius: 8,
+                  background: 'var(--bg-elevated)', fontSize: '0.82rem',
                 }}>
                   <div style={{
-                    width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                    width: 26, height: 26, borderRadius: 6, flexShrink: 0,
                     background: `${color}18`, display: 'flex',
                     alignItems: 'center', justifyContent: 'center', color,
                   }}>
-                    <Icon size={14} />
+                    <Icon size={12} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem' }}>
-                      <span style={{ fontWeight: 600 }}>{alert.title}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.1rem' }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.82rem' }}>{alert.title}</span>
                       <span className={`badge badge-${alert.severity === 'critical' ? 'error' : alert.severity === 'high' ? 'warning' : 'info'}`}
-                        style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                        style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.03em', padding: '1px 5px' }}>
                         {alert.severity}
                       </span>
                     </div>
                     {alert.description && (
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.4 }}>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', lineHeight: 1.4 }}>
                         {alert.description}
                       </div>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
-                    <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.7rem' }}
+                  <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, marginTop: '0.15rem' }}>
+                    <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.65rem', padding: '2px 6px', height: 'auto' }}
                       onClick={() => alertAction(alert.id, 'acknowledge')}
                       disabled={alertActionId === alert.id}>
                       Ack
                     </button>
-                    <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.7rem' }}
+                    <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.65rem', padding: '2px 6px', height: 'auto' }}
                       onClick={() => alertAction(alert.id, 'dismiss')}
                       disabled={alertActionId === alert.id}>
                       Dismiss
