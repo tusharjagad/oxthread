@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { UserRole } from '@prisma/client'
 import { requireRole } from '@/lib/rbac'
 import { prisma } from '@/lib/prisma'
-import { syncAiAlerts } from '@/lib/ai-monitor'
 
 export async function GET(request: NextRequest) {
   const auth = requireRole(request, UserRole.DEVELOPER)
@@ -16,20 +15,11 @@ export async function GET(request: NextRequest) {
     if (status) where.status = status
     if (type) where.type = type
 
-    let alerts = await prisma.aiAlert.findMany({
+    const alerts = await prisma.aiAlert.findMany({
       where: where as never,
       orderBy: [{ severity: 'desc' }, { detectedAt: 'desc' }],
       take: 50,
     })
-
-    if (alerts.length === 0) {
-      await syncAiAlerts()
-      alerts = await prisma.aiAlert.findMany({
-        where: { status: 'open' },
-        orderBy: [{ severity: 'desc' }, { detectedAt: 'desc' }],
-        take: 50,
-      })
-    }
 
     const counts = await prisma.aiAlert.groupBy({
       by: ['status'],
@@ -37,7 +27,10 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json({
-      alerts,
+      alerts: alerts.map((a) => ({
+        ...a,
+        detectedAt: a.detectedAt.toISOString(),
+      })),
       counts: Object.fromEntries(counts.map((c) => [c.status, c._count])),
     })
   } catch {
