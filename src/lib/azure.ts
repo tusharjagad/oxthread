@@ -38,6 +38,46 @@ export interface ContainerAppInfo {
   location?: string
 }
 
+const CONTAINER_APPS_API_VERSION = '2024-02-02-preview'
+
+function getContainerAppResourceUrl(subscriptionId: string, resourceGroup: string, containerAppName: string) {
+  return `https://management.azure.com/subscriptions/${encodeURIComponent(subscriptionId)}/resourceGroups/${encodeURIComponent(resourceGroup)}/providers/Microsoft.App/containerApps/${encodeURIComponent(containerAppName)}?api-version=${CONTAINER_APPS_API_VERSION}`
+}
+
+export async function getContainerAppResource(
+  subscriptionId: string,
+  resourceGroup: string,
+  containerAppName: string,
+): Promise<{ status: number; resource?: Record<string, unknown>; error?: string }> {
+  const token = await getAzureAccessToken()
+  const res = await fetch(getContainerAppResourceUrl(subscriptionId, resourceGroup, containerAppName), {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+  if (!res.ok) return { status: res.status, error: await res.text() }
+  return { status: res.status, resource: await res.json() }
+}
+
+export async function updateContainerAppResource(
+  subscriptionId: string,
+  resourceGroup: string,
+  containerAppName: string,
+  resource: Record<string, unknown>,
+): Promise<{ status: number; resource?: Record<string, unknown>; error?: string }> {
+  const token = await getAzureAccessToken()
+  const res = await fetch(getContainerAppResourceUrl(subscriptionId, resourceGroup, containerAppName), {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(resource),
+  })
+
+  if (!res.ok) return { status: res.status, error: await res.text() }
+  return { status: res.status, resource: await res.json() }
+}
+
 export async function getContainerAppInfo(
   containerAppName: string,
   subscriptionId: string

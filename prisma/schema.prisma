@@ -213,6 +213,57 @@ model AppSettings {
   @@map("app_settings")
 }
 
+model AzureCostSnapshot {
+  id             String   @id @default(uuid())
+  subscriptionId String   @map("subscription_id")
+  date           DateTime
+  cost           Float
+  currency       String   @default("USD")
+  forecast       Float?
+  periodStart    DateTime @map("period_start")
+  periodEnd      DateTime @map("period_end")
+  source         String   @default("CostManagement")
+  createdAt      DateTime @default(now())
+
+  breakdowns AzureCostBreakdown[]
+
+  @@map("azure_cost_snapshots")
+}
+
+model AzureCostBreakdown {
+  id              String  @id @default(uuid())
+  snapshotId      String  @map("snapshot_id")
+  resourceId      String  @map("resource_id")
+  resourceName    String  @map("resource_name")
+  resourceType    String  @map("resource_type")
+  location        String?
+  cost            Float
+  currency        String  @default("USD")
+  meterCategory   String? @map("meter_category")
+  meterSubCategory String? @map("meter_sub_category")
+  tags            Json?
+
+  snapshot AzureCostSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+
+  @@map("azure_cost_breakdowns")
+}
+
+model AzureRecommendation {
+  id                 String   @id @default(uuid())
+  resourceId         String   @map("resource_id")
+  resourceName       String   @map("resource_name")
+  recommendationType String   @map("recommendation_type")
+  category           String   @default("cost")
+  impact             Float
+  currency           String   @default("USD")
+  description        String?
+  action             String?
+  status             String   @default("open")
+  createdAt          DateTime @default(now())
+
+  @@map("azure_recommendations")
+}
+
 model Invitation {
   id        String    @id @default(uuid())
   email     String

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   LayoutDashboard, Database, GitBranch, Cloud, Lock, ShieldCheck,
   ClipboardList, Users, Settings, Puzzle, Cog, ChevronDown,
-  Server, FileKey,
+  Server, FileKey, TrendingUp, DollarSign,
 } from '@/lib/icons'
 
 interface NavItem {
@@ -41,7 +41,14 @@ const navigation: NavSection[] = [
         ],
       },
       { label: 'CI/CD Pipelines', href: '/dashboard/pipelines',   icon: <GitBranch size={16} /> },
-      { label: 'Azure Resources', href: '/dashboard/azure',       icon: <Cloud size={16} /> },
+      {
+        label: 'Azure Resources', href: '/dashboard/azure', icon: <Cloud size={16} />,
+        children: [
+          { label: 'Container Apps', href: '/dashboard/azure/container-apps', icon: <Server size={14} /> },
+          { label: 'Redis Container', href: '/dashboard/azure/redis', icon: <Database size={14} /> },
+          { label: 'Cost Management', href: '/dashboard/azure/costs', icon: <DollarSign size={14} /> },
+        ],
+      },
     ],
   },
   {
@@ -66,9 +73,9 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 
 export function Sidebar() {
   const pathname = usePathname()
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => ({
-    'PostgreSQL': pathname.startsWith('/dashboard/postgresql'),
-  }))
+  // Keep the first server and client render identical. Route-derived expansion
+  // caused React to hydrate a collapsed section as an expanded one.
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
 
   const toggleSection = (label: string) => {
     setExpandedSections((prev) => ({ ...prev, [label]: !prev[label] }))
@@ -81,7 +88,7 @@ export function Sidebar() {
           <p className="nav-section-label">{section.title}</p>
           {section.items.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-            const isExpanded = expandedSections[item.label] ?? pathname.startsWith(item.href + '/')
+            const isExpanded = expandedSections[item.label] ?? false
 
             if (item.children) {
               return (

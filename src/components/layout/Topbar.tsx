@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { useAuth } from '@/contexts/auth-context'
 import { Bell, Search, LogOut, ChevronDown, User } from '@/lib/icons'
 import { useRouter } from 'next/navigation'
+import oxThreadLogo from '../../../logo.png'
 
 export function Topbar() {
   const { user, logout } = useAuth()
@@ -25,18 +27,14 @@ export function Topbar() {
   return (
     <header className="topbar">
       {/* Logo */}
-      <div className="flex items-center gap-2" style={{ minWidth: 'var(--sidebar-width)', marginLeft: '-1.5rem', padding: '0 1.5rem' }}>
-        <div style={{
-          width: 32, height: 32, borderRadius: 8,
-          background: 'linear-gradient(135deg, var(--brand-purple), var(--brand-purple-dark))',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '1rem', fontWeight: 800, color: 'white',
-        }}>
-          🐂
-        </div>
-        <span style={{ fontWeight: 800, fontSize: '1.1rem', background: 'linear-gradient(135deg, #a78bfa, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          OxThread
-        </span>
+      <div className="flex items-center" style={{ minWidth: 'var(--sidebar-width)', marginLeft: '-1.5rem', padding: '0 1.25rem' }}>
+        <Image
+          src={oxThreadLogo}
+          alt="OxThread"
+          priority
+          className="object-contain"
+          style={{ width: 76, height: 76, margin: '-13px -6px -13px -10px' }}
+        />
       </div>
 
       {/* Search */}
@@ -62,7 +60,7 @@ export function Topbar() {
           <span style={{
             position: 'absolute', top: 6, right: 6,
             width: 8, height: 8, borderRadius: '50%',
-            background: 'var(--brand-purple)',
+            background: 'var(--brand-cyan)',
           }} />
         </button>
 
@@ -75,7 +73,7 @@ export function Topbar() {
           >
             <div style={{
               width: 30, height: 30, borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--brand-purple), var(--brand-blue))',
+              background: 'linear-gradient(135deg, var(--brand-blue), var(--brand-cyan))',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '0.75rem', fontWeight: 700, color: 'white', flexShrink: 0,
             }}>

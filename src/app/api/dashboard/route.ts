@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireRole } from '@/lib/rbac'
 import { UserRole } from '@prisma/client'
+import { getContainerAppCount } from '@/lib/azure-cost'
 
 export async function GET(request: NextRequest) {
   const auth = requireRole(request, UserRole.DEVELOPER)
@@ -14,6 +15,8 @@ export async function GET(request: NextRequest) {
     pendingAccessRequests,
     recentActivity,
     requestOverview,
+    latestCost,
+    azureResourceCount,
   ] = await Promise.all([
     prisma.user.count({ where: { isActive: true } }),
     prisma.pipeline.count(),
@@ -30,16 +33,22 @@ export async function GET(request: NextRequest) {
       WHERE created_at > NOW() - INTERVAL '30 days'
       GROUP BY status
     `,
+    prisma.azureCostSnapshot.findFirst({
+      orderBy: { date: 'desc' },
+      select: { cost: true, forecast: true, currency: true },
+    }),
+    getContainerAppCount().catch(() => 0),
   ])
-
-  const azureResources = 67 // placeholder until Azure SDK integration
 
   return NextResponse.json({
     stats: {
       totalUsers,
       activePipelines,
-      azureResources,
+      azureResources: azureResourceCount,
       activeRequests: pendingAccessRequests,
+      monthlyCost: latestCost?.cost ?? null,
+      monthlyCostForecast: latestCost?.forecast ?? null,
+      costCurrency: latestCost?.currency ?? 'USD',
     },
     recentActivity,
     requestOverview: requestOverview.map((r) => ({

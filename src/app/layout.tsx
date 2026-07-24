@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
-import Script from 'next/script'
 import './globals.css'
 import { AuthProvider } from '@/contexts/auth-context'
 
@@ -35,18 +34,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
-      <head />
       <body>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {`
-            (function() {
-              try {
-                var theme = localStorage.getItem('oxthread-theme') || 'dark';
-                document.documentElement.classList.add(theme);
-              } catch(e) {}
-            })();
-          `}
-        </Script>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

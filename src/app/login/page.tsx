@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Lock, Eye, EyeOff, AlertTriangle, Key, ChevronRight } from '@/lib/icons'
 import LoginIllustration from '@/components/login-illustration'
+import oxThreadLogo from '../../../logo.png'
 
 const BRAND_BLUE = '#246BFF'
 const BRAND_CYAN = '#11D8C3'
@@ -198,50 +200,45 @@ export default function LoginPage() {
         )}
       </div>
 
-      {/* ── Left Panel (40%) ── */}
+      {/* ── Left Panel ── */}
       <motion.div
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="hidden lg:flex flex-col w-[44%] min-h-screen relative z-10 pt-10 pb-6 pl-20 pr-10 xl:pt-14 xl:pb-8 xl:pl-24 xl:pr-12 2xl:pt-16 2xl:pb-10 2xl:pl-[96px] 2xl:pr-14"
+        className="hidden lg:flex flex-col min-h-screen relative z-10"
+        style={{
+          flex: '0 0 clamp(520px, 44vw, 820px)',
+          padding: 'clamp(36px, 5vw, 80px) clamp(40px, 5vw, 88px) clamp(32px, 4vw, 64px)',
+        }}
       >
-        {/* Logo */}
+        {/* Brand mark */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.5 }}
-          className="flex items-center gap-3"
+          className="flex items-center"
         >
-          <motion.div
-            animate={{ y: [0, -3, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
-            style={{ background: GRADIENT, boxShadow: '0 4px 24px rgba(36,107,255,0.3)' }}
-          >
-            <span className="text-white font-bold text-[22px] tracking-tight">O</span>
-          </motion.div>
-          <div>
-            <div className="font-semibold text-xl text-white/85 tracking-tight">
-              oxThread
-            </div>
-            <div className="text-[0.65rem] font-medium tracking-widest uppercase mt-0.5" style={{ color: 'rgba(255,255,255,0.2)' }}>
-              Enterprise DevOps Automation Platform
-            </div>
-          </div>
+          <Image
+            src={oxThreadLogo}
+            alt="OxThread DevOps Automation"
+            priority
+            className="object-contain"
+            style={{ width: 132, height: 132, margin: '-20px 0 -18px -14px' }}
+          />
         </motion.div>
 
         {/* Hero */}
-        <div className="flex-1 flex flex-col justify-center -mt-[72px]">
+        <div className="flex-1 flex flex-col justify-center py-12">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.6 }}
-            className="mb-12"
+            className="max-w-[520px]"
           >
             <h1
               className="font-bold leading-[1.1] tracking-tight"
               style={{
-                fontSize: 'clamp(38px, 4vw, 54px)',
+                fontSize: 'clamp(42px, 4.1vw, 64px)',
               }}
             >
               <span className="text-white/88">Automate.</span>
@@ -267,8 +264,8 @@ export default function LoginPage() {
               </span>
             </h1>
             <p
-              className="mt-8 text-sm leading-relaxed max-w-sm"
-              style={{ color: 'rgba(255,255,255,0.38)' }}
+              className="mt-7 text-[0.9375rem] leading-relaxed max-w-md"
+              style={{ color: 'rgba(255,255,255,0.45)' }}
             >
               Streamline your DevOps lifecycle with intelligent automation, infrastructure orchestration, deployment pipelines, and real-time observability.
             </p>
@@ -280,19 +277,19 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="pb-2"
+          className="w-full max-w-[520px]"
         >
           <LoginIllustration />
         </motion.div>
       </motion.div>
 
-      {/* ── Right Panel (60%) ── */}
+      {/* ── Right Panel ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.15 }}
-        className="flex-1 min-h-screen flex items-center justify-center relative z-10 p-5 sm:p-8"
-        style={{ background: DARK_SURFACE }}
+        className="flex-1 min-h-screen flex items-center justify-center relative z-10 p-5 sm:p-8 lg:p-12"
+        style={{ background: DARK_SURFACE, minWidth: 0 }}
       >
         <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.02 }}>
           <defs>
@@ -302,19 +299,20 @@ export default function LoginPage() {
           </defs>
           <rect width="100%" height="100%" fill="url(#g2)" />
         </svg>
-        {/* Mobile logo */}
+        {/* Mobile brand mark */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="lg:hidden absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5"
+          className="lg:hidden absolute top-4 left-1/2 -translate-x-1/2"
         >
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: GRADIENT }}>
-            <span className="text-white font-bold text-base">O</span>
-          </div>
-          <div>
-            <span className="font-semibold text-base text-white/80">oxThread</span>
-          </div>
+          <Image
+            src={oxThreadLogo}
+            alt="OxThread DevOps Automation"
+            priority
+            className="object-contain"
+            style={{ width: 104, height: 104, margin: '-18px 0' }}
+          />
         </motion.div>
 
         {/* Right panel card glow */}
@@ -322,6 +320,7 @@ export default function LoginPage() {
           width: '80%', height: '80%', top: '10%', left: '10%',
           background: 'radial-gradient(circle, rgba(36,107,255,0.06), transparent 70%)',
         }} />
+
         <div className="absolute pointer-events-none" style={{
           width: '50%', height: '50%', bottom: '5%', right: '5%',
           background: 'radial-gradient(circle, rgba(17,216,195,0.04), transparent 70%)',
@@ -332,20 +331,20 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="w-full mt-6 lg:mt-8"
-          style={{ maxWidth: 560 }}
+          className="w-full mt-16 lg:mt-10"
+          style={{ maxWidth: 520 }}
         >
           <div
             className="relative overflow-hidden"
             style={{
-              borderRadius: 28,
-              background: 'rgba(15, 23, 40, 0.6)',
+              borderRadius: 24,
+              background: 'rgba(12, 22, 40, 0.78)',
               backdropFilter: 'blur(64px)',
               WebkitBackdropFilter: 'blur(64px)',
               border: '1px solid rgba(255,255,255,0.12)',
               boxShadow:
                 '0 50px 100px -24px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 60px rgba(36,107,255,0.05), 0 0 2px rgba(17,216,195,0.06)',
-              padding: '48px 48px 40px',
+              padding: '40px clamp(28px, 4vw, 44px) 32px',
             }}
           >
             {/* Glass reflection */}
@@ -380,7 +379,7 @@ export default function LoginPage() {
               style={{ position: 'relative', zIndex: 1 }}
             >
               {/* Status indicator */}
-              <motion.div variants={itemVariants} className="flex items-center gap-2 mb-6">
+              <motion.div variants={itemVariants} className="flex items-center gap-2 mb-5">
                 <motion.span
                   className="w-[7px] h-[7px] rounded-full"
                   style={{ background: '#10B981' }}
@@ -394,11 +393,11 @@ export default function LoginPage() {
 
               {/* Card header */}
               <motion.div variants={itemVariants}>
-                <h2 className="text-[40px] font-bold leading-[1.1] tracking-tight text-white/90">
+                <h2 className="text-[clamp(2rem,3vw,2.4rem)] font-bold leading-[1.1] tracking-tight text-white/90">
                   Welcome Back
                 </h2>
                 <p
-                  className="mt-3"
+                  className="mt-2.5"
                   style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, lineHeight: 1.5 }}
                 >
                   Sign in to your account to continue
@@ -415,7 +414,7 @@ export default function LoginPage() {
               </AnimatePresence>
 
               {/* Form */}
-              <form onSubmit={handleLogin} className="mt-8 flex flex-col gap-5">
+              <form onSubmit={handleLogin} className="mt-7 flex flex-col gap-5">
                 {/* Access Key */}
                 <motion.div variants={itemVariants} className="flex flex-col gap-2">
                   <label
@@ -625,15 +624,12 @@ export default function LoginPage() {
               </form>
 
               {/* Footer */}
-              <div className="mt-14 pt-5 text-center border-t border-white/[0.03]">
+              <div className="mt-9 pt-5 text-center border-t border-white/[0.06]">
                 <motion.div variants={itemVariants}>
-                  <p className="text-[0.65rem] tracking-wider" style={{ color: 'rgba(255,255,255,0.15)' }}>
-                    &copy; 2026 oxThread
+                  <p className="text-[0.65rem] tracking-wider" style={{ color: 'rgba(255,255,255,0.24)' }}>
+                    &copy; 2026 oxThread · Enterprise DevOps Automation
                   </p>
-                  <p className="text-[0.58rem] tracking-wider mt-1.5" style={{ color: 'rgba(255,255,255,0.1)' }}>
-                    Enterprise DevOps Automation
-                  </p>
-                  <p className="text-[0.55rem] tracking-wider mt-1" style={{ color: 'rgba(255,255,255,0.07)' }}>
+                  <p className="text-[0.55rem] tracking-wider mt-1.5" style={{ color: 'rgba(255,255,255,0.14)' }}>
                     Version 1.0.0
                   </p>
                 </motion.div>

@@ -1,0 +1,441 @@
+id: /subscriptions/ec9e7040-8266-4b02-ae26-32a8fbfcdd2c/resourceGroups/northeurope-rg/providers/Microsoft.App/containerapps/cow-solver-staging
+identity:
+  principalId: fbc701a2-d6f3-4d72-8bbc-5b74bd14cf5d
+  tenantId: 3231f347-ba06-4feb-bd88-933da80e8dff
+  type: SystemAssigned
+kind: containerapps
+location: North Europe
+name: cow-solver-staging
+properties:
+  configuration:
+    activeRevisionsMode: Single
+    dapr: null
+    identitySettings: []
+    ingress:
+      additionalPortMappings: []
+      allowInsecure: false
+      clientCertificateMode: Ignore
+      corsPolicy: null
+      customDomains: null
+      exposedPort: 0
+      external: true
+      fqdn: cow-solver-staging.prouddune-214e3b7d.northeurope.azurecontainerapps.io
+      ipSecurityRestrictions: []
+      stickySessions:
+        affinity: none
+      targetPort: 11088
+      traffic:
+      - latestRevision: true
+        weight: 100
+      transport: Auto
+    maxInactiveRevisions: 100
+    registries:
+    - identity: system
+      passwordSecretRef: ''
+      server: acrorbtprodsan.azurecr.io
+      username: ''
+    runtime: null
+    secrets:
+    - name: reg-pswd-6fe9e458-9ac7
+    - name: test-acc-auth-key
+    service: null
+  customDomainVerificationId: 75DC27C1B82FFF202B3343EF3BB05C3EDE005DD4E5366CC3300B3FF357FA8C93
+  delegatedIdentities: []
+  environmentId: /subscriptions/ec9e7040-8266-4b02-ae26-32a8fbfcdd2c/resourceGroups/northeurope-rg/providers/Microsoft.App/managedEnvironments/northeuroperg-env-vnet
+  eventStreamEndpoint: https://northeurope.azurecontainerapps.dev/subscriptions/ec9e7040-8266-4b02-ae26-32a8fbfcdd2c/resourceGroups/northeurope-rg/containerApps/cow-solver-staging/eventstream
+  latestReadyRevisionName: cow-solver-staging--0000141
+  latestRevisionFqdn: cow-solver-staging--0000141.prouddune-214e3b7d.northeurope.azurecontainerapps.io
+  latestRevisionName: cow-solver-staging--0000141
+  managedEnvironmentId: /subscriptions/ec9e7040-8266-4b02-ae26-32a8fbfcdd2c/resourceGroups/northeurope-rg/providers/Microsoft.App/managedEnvironments/northeuroperg-env-vnet
+  outboundIpAddresses:
+  - 20.105.70.20
+  - 20.105.70.58
+  - 20.105.69.247
+  - 20.105.70.28
+  - 20.105.47.15
+  - 20.105.47.12
+  - 4.208.220.175
+  - 4.208.218.235
+  - 4.208.219.44
+  - 4.208.219.6
+  - 20.105.32.76
+  - 20.105.32.139
+  - 20.105.33.209
+  - 20.105.33.28
+  - 20.105.32.212
+  - 20.105.32.182
+  - 20.105.33.168
+  - 20.105.33.212
+  - 20.105.33.155
+  - 20.105.33.195
+  - 4.208.20.29
+  - 132.164.219.65
+  - 128.251.88.173
+  - 4.207.105.28
+  - 4.208.96.159
+  - 20.223.25.183
+  - 4.207.216.65
+  - 20.13.249.149
+  - 4.207.64.63
+  - 172.205.33.239
+  - 20.223.122.169
+  - 52.155.173.170
+  - 20.223.250.21
+  - 20.123.103.147
+  - 135.236.217.236
+  - 20.105.55.247
+  - 20.54.2.141
+  - 20.223.38.196
+  - 20.166.132.191
+  - 4.245.147.211
+  - 4.209.224.55
+  - 172.205.44.7
+  - 20.54.3.244
+  - 20.54.98.7
+  - 4.207.211.109
+  - 20.223.21.222
+  - 4.208.97.27
+  - 132.164.148.204
+  - 132.164.148.121
+  - 128.251.88.75
+  - 20.82.159.125
+  - 4.207.64.51
+  - 20.166.233.193
+  - 20.107.137.66
+  - 4.207.32.247
+  - 20.238.6.182
+  - 132.164.148.57
+  - 52.156.203.41
+  - 4.231.131.52
+  - 4.210.16.13
+  - 52.236.10.233
+  - 4.207.209.95
+  - 172.205.44.20
+  - 20.166.138.202
+  - 128.251.110.10
+  - 52.236.13.121
+  - 20.166.138.114
+  - 128.251.108.109
+  - 4.207.156.22
+  - 135.236.217.232
+  - 172.205.33.183
+  - 4.207.104.97
+  - 52.142.85.185
+  - 20.13.229.235
+  - 20.223.98.139
+  - 128.251.104.153
+  - 52.142.85.215
+  - 20.166.137.254
+  - 4.207.216.58
+  - 52.236.8.157
+  - 20.105.124.149
+  - 20.105.123.192
+  - 20.105.123.181
+  - 20.105.124.100
+  - 20.123.115.147
+  - 20.123.115.110
+  - 4.210.23.209
+  - 4.210.23.217
+  - 4.210.23.181
+  - 4.210.23.186
+  - 52.178.141.116
+  - 52.178.138.108
+  - 52.178.138.196
+  - 52.178.141.59
+  - 52.178.141.173
+  - 52.178.141.228
+  - 52.178.139.43
+  - 52.169.76.168
+  - 52.178.141.140
+  - 52.178.138.54
+  - 20.13.204.202
+  - 4.207.217.91
+  - 52.155.234.156
+  - 172.205.35.249
+  - 172.205.35.229
+  - 48.209.157.68
+  - 4.209.25.170
+  - 40.67.253.40
+  - 20.223.120.156
+  - 20.223.123.166
+  - 132.164.189.149
+  - 20.166.148.123
+  - 20.105.33.160
+  - 4.207.105.136
+  - 48.209.172.155
+  - 20.105.17.204
+  - 128.251.111.10
+  - 134.149.0.27
+  - 52.155.232.34
+  - 172.205.110.108
+  - 132.164.189.61
+  - 172.205.110.119
+  - 20.54.120.47
+  - 20.13.205.127
+  - 20.54.120.50
+  - 20.107.164.137
+  - 4.231.133.137
+  - 4.210.22.253
+  - 52.155.234.111
+  - 4.210.8.84
+  - 4.208.46.8
+  - 20.54.102.243
+  - 20.166.148.86
+  - 20.93.57.181
+  - 20.54.24.37
+  - 20.13.210.210
+  - 4.209.73.224
+  - 40.127.254.87
+  - 40.127.254.100
+  - 20.166.96.165
+  - 20.107.142.246
+  - 52.142.112.78
+  - 135.236.200.227
+  - 132.164.159.156
+  - 52.142.87.254
+  - 4.208.97.209
+  - 4.207.70.255
+  - 48.209.157.6
+  - 4.210.20.122
+  - 4.210.23.21
+  - 4.207.169.135
+  - 132.164.159.145
+  - 4.208.46.25
+  - 20.13.210.209
+  - 132.164.189.57
+  - 52.142.112.141
+  - 20.223.116.200
+  - 4.207.216.228
+  - 4.210.8.92
+  - 20.166.96.168
+  - 4.207.110.158
+  provisioningState: Succeeded
+  runningStatus: Running
+  template:
+    containers:
+    - args: []
+      command: []
+      env:
+      - name: ETHRPC
+        value: https://quick-tiniest-spring.ethereum-mainnet.quiknode.pro/8a312d6359608b57d724db83feb18e4bb8c5ab88
+      - name: ORBT_PREHEDGE_URL
+        value: http://localhost:8080/prehedge
+      - name: DRIVER_ADDR
+        value: 0.0.0.0:11088
+      - name: COW_ENV
+        value: staging
+      - name: COW_NETWORK
+        value: mainnet
+      - name: SUBMISSION_KMS_KEY_ID
+        value: arn:aws:kms:us-east-2:683919168713:alias/orbt/prod/signing-key/cow-solver-staging
+      - name: AWS_REGION
+        value: us-east-2
+      - name: RUST_BACKTRACE
+        value: '0'
+      - name: AWS_ROLE_ARN
+        value: arn:aws:iam::683919168713:role/cow-solver-staging-san-role
+      - name: TOML_TRACE_ERROR
+        value: '1'
+      - name: USE_JSON_LOGS
+        value: 'true'
+      - name: ENGINE_ADMIN_SECRET
+        value: c6969acc5865dcd9f737204f767d0210b8cb0fedf2ed79450849c53a13603eaf
+      - name: DRIVER_ADMIN_TOKEN
+        value: orbt-test-6874b4b8c07f5a01e26035fd
+      - name: DRIVER_LOG_LOSSY
+        value: 'true'
+      - name: DRIVER_LOG_FILE_FILTER
+        value: warn,driver=debug,shared=debug
+      - name: DRIVER_LOG_DIR
+        value: /mnt/logs/driver
+      image: acrorbtprodsan.azurecr.io/cow-driver:01dc6242668f2a2b6720e50762ff25d18af5b223
+      name: cow-driver
+      probes: []
+      resources:
+        cpu: 1
+        ephemeralStorage: 4Gi
+        memory: 2Gi
+      volumeMounts:
+      - mountPath: /mnt/logs/
+        subPath: cow-driver
+        volumeName: cow-solver-staging-volume
+    - args: []
+      command: []
+      env:
+      - name: ENGINE_ADDR
+        value: 0.0.0.0:8080
+      - name: CHAIN_ID
+        value: '1'
+      - name: RUST_LOG
+        value: info
+      - name: GPV2_SETTLEMENT
+        value: '0x9008D19f58AAbD9eD0D60971565AA8510560ab41'
+      - name: GPV2_VAULT_RELAYER
+        value: '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110'
+      - name: GPV2_ALLOWLIST_AUTHENTICATOR
+        value: '0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE'
+      - name: EXECUTOR_ADDRESS
+        value: '0x20e882e70d199b5e342e63e8203e1c46bfd396f1'
+      - name: MAKER_ADDRESS
+        value: '0x5839ac5523902923fddEd890DA89F1F08eBCE7Ce'
+      - name: SOLVER_ADDRESS
+        value: '0xC869535e809565E1B7f30fcd758be4908eAcD76D'
+      - name: REWARDS_ADDRESS
+        value: '0xBE62ca06Ba4b03055b4d859ea6Fc38fBEF28019e'
+      - name: ARB_RPC_URL
+        value: https://quick-tiniest-spring.ethereum-mainnet.quiknode.pro/8a312d6359608b57d724db83feb18e4bb8c5ab88
+      - name: WATCH_RPC_URL
+        value: https://quick-tiniest-spring.ethereum-mainnet.quiknode.pro/8a312d6359608b57d724db83feb18e4bb8c5ab88
+      - name: MEV_RPC_URL
+        value: https://quick-tiniest-spring.ethereum-mainnet.quiknode.pro/8a312d6359608b57d724db83feb18e4bb8c5ab88
+      - name: AWS_REGION
+        value: us-east-2
+      - name: SUBMISSION_KMS_KEY_ID
+        value: arn:aws:kms:us-east-2:683919168713:alias/orbt/prod/signing-key/cow-solver-staging
+      - name: DATABASE_URL
+        value: postgres://solveruser:KVzDs0V2BGrbJu0CU!@orbt-postgres.postgres.database.azure.com:5432/orbt-solver-stats?sslmode=require
+      - name: HEDGE_ENABLED
+        value: '1'
+      - name: CEX_VENUE
+        value: okx
+      - name: OKX_API_KEY
+        value: 71746965-6433-4b83-a4e5-2b5dc8f3e538
+      - name: OKX_API_SECRET
+        value: FC61B67F59C0EB5344C89165C1A2FF04
+      - name: OKX_API_PASSPHRASE
+        value: 0rbT@2025$
+      - name: GATE_MARGIN_BPS
+        value: '30'
+      - name: GATE_COST_FLOOR_BPS
+        value: '5'
+      - name: GATE_FEE_BPS
+        value: '0'
+      - name: COW_ENV
+        value: staging
+      - name: COW_NETWORK
+        value: mainnet
+      - name: RUST_BACKTRACE
+        value: '1'
+      - name: FILLER_SIGN_API_URL
+        value: https://orbt-settlement-preprod.prouddune-214e3b7d.northeurope.azurecontainerapps.io
+      - name: FILLER_ADDRESS
+        value: '0xC869535e809565E1B7f30fcd758be4908eAcD76D'
+      - name: FILLER_AUTH_KMS_KEY_ID
+        value: arn:aws:kms:us-east-2:683919168713:alias/orbt/prod/signing-key/cow-solver-staging
+      - name: AWS_ROLE_ARN
+        value: arn:aws:iam::683919168713:role/cow-solver-staging-san-role
+      - name: BALANCE_RPC_URL
+        value: https://quick-tiniest-spring.ethereum-mainnet.quiknode.pro/8a312d6359608b57d724db83feb18e4bb8c5ab88
+      - name: ENGINE_SOLVE_PRICER
+        value: gate
+      - name: ENGINE_ADMIN_SECRET
+        value: c6969acc5865dcd9f737204f767d0210b8cb0fedf2ed79450849c53a13603eaf
+      - name: ENGINE_MARKETS_CONFIG
+        value: /app/markets.json
+      - name: ENGINE_LOG_DIR
+        value: /app/logs
+      - name: ENGINE_DATA_DIR
+        value: ./data
+      - name: ENGINE_LOG_FILE_ENABLED
+        value: 'true'
+      - name: ENGINE_LOG_BUFFER_LINES
+        value: '100000'
+      - name: ENGINE_LOG_RETENTION_HOURS
+        value: '168'
+      - name: COMPLIANCE_WINDOW
+        value: '50'
+      - name: COMPLIANCE_MIN_SAMPLES
+        value: '20'
+      - name: COMPLIANCE_THRESHOLD_BPS
+        value: '8200'
+      - name: RATE_LIMIT_QUOTE_RPS
+        value: '50'
+      - name: RATE_LIMIT_QUOTE_BURST
+        value: '100'
+      - name: FILLER_SIGN_TIMEOUT_MS
+        value: '10000'
+      - name: FILLER_SIGN_MAX_NONCE_RETRIES
+        value: '2'
+      - name: JIT_VALIDTO_WINDOW_SECONDS
+        value: '300'
+      - name: JIT_VALIDTO_CEILING_SECONDS
+        value: '180'
+      - name: FILLER_ENVELOPE_CACHE_MAX_SIZE
+        value: '10000'
+      - name: REDIS_URL
+        value: redis://127.0.0.1:6379/0
+      - name: TEST_ACC_AUTH_KEY
+        secretRef: test-acc-auth-key
+        value: ''
+      image: acrorbtprodsan.azurecr.io/cow-engine:01dc6242668f2a2b6720e50762ff25d18af5b223
+      name: cow-engine
+      probes: []
+      resources:
+        cpu: 1
+        ephemeralStorage: 4Gi
+        memory: 2Gi
+      volumeMounts:
+      - mountPath: /app/logs
+        subPath: cow-engine
+        volumeName: cow-solver-staging-volume
+    - command:
+      - /bin/sh
+      args:
+      - -c
+      - |
+        if [ -f /data/appendonlydir/appendonly.aof.manifest ]; then
+          echo "Checking and repairing AOF..."
+          yes | redis-check-aof --fix /data/appendonlydir/appendonly.aof.manifest || true
+        fi
+
+        exec redis-server \
+          --dir /data \
+          --appendonly yes \
+          --maxmemory 384mb \
+          --maxmemory-policy noeviction
+      image: docker.io/redis:7-alpine
+      name: redis
+      probes: []
+      resources:
+        cpu: 0.5
+        ephemeralStorage: 2Gi
+        memory: 1Gi
+      volumeMounts:
+      - mountPath: /data
+        subPath: redis-data
+        volumeName: cow-solver-staging-volume
+    initContainers: null
+    revisionSuffix: ''
+    scale:
+      cooldownPeriod: 300
+      maxReplicas: 1
+      minReplicas: 1
+      pollingInterval: 30
+      rules:
+      - http:
+          metadata:
+            concurrentRequests: '10'
+        name: http-scaler
+    serviceBinds: null
+    terminationGracePeriodSeconds: null
+    volumes:
+    - name: cow-solver-staging-volume
+      storageName: cow-solver-staging-log
+      storageType: AzureFile
+  workloadProfileName: Consumption
+resourceGroup: northeurope-rg
+systemData:
+  createdAt: '2026-07-09T18:09:43.7684389'
+  createdBy: codexhub@orbt.xyz
+  createdByType: User
+  lastModifiedAt: '2026-07-23T15:41:23.0553142'
+  lastModifiedBy: c668a031-f95a-4300-b76b-64a8359f7ec4
+  lastModifiedByType: Application
+tags:
+  CreatedBy: Tushar Jagad
+  CreatedDate: 09-July-2026 11:38 PM IST
+  Environment: UAT
+  Region: North Europe
+  git repo: https://github.com/Orbtofficial/CoW-Solver/tree/Development
+  stackholder: JB
+type: Microsoft.App/containerApps
