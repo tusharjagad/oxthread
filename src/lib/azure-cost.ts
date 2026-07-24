@@ -38,6 +38,24 @@ export interface Recommendation {
   action: string | null
 }
 
+async function fetchWithRetry(url: string, options: RequestInit, retries = 2): Promise<Response> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(url, options)
+      if (res.ok) return res
+      if (i < retries && res.status >= 429) {
+        await new Promise(r => setTimeout(r, 1000 * (i + 1)))
+        continue
+      }
+      return res
+    } catch {
+      if (i >= retries) throw new Error('Request failed after retries')
+      await new Promise(r => setTimeout(r, 1000 * (i + 1)))
+    }
+  }
+  throw new Error('Request failed after retries')
+}
+
 async function getAccessToken(): Promise<string> {
   const clientId = process.env.AZURE_CLIENT_ID
   const clientSecret = process.env.AZURE_CLIENT_SECRET
@@ -47,7 +65,7 @@ async function getAccessToken(): Promise<string> {
     throw new Error('Azure credentials not configured')
   }
 
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
     {
       method: 'POST',
@@ -117,7 +135,7 @@ export async function queryMonthlyCost(timeframe: 'ThisMonth' | 'LastMonth' = 'T
 
   const body = buildCostQuery(timeframe)
 
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -211,7 +229,7 @@ export async function getForecast(): Promise<number | null> {
   }
 
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithRetry(url, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -246,7 +264,7 @@ export async function getAdvisorRecommendations(): Promise<Recommendation[]> {
   const url = `https://management.azure.com/subscriptions/${subscriptionId}/providers/Microsoft.Advisor/recommendations?api-version=2023-01-01&$filter=Category eq 'Cost'`
 
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithRetry(url, {
       headers: { Authorization: `Bearer ${token}` },
     })
 
@@ -256,11 +274,17 @@ export async function getAdvisorRecommendations(): Promise<Recommendation[]> {
     return (data.value || []).map((rec: Record<string, unknown>) => {
       const props = rec.properties as Record<string, unknown> || {}
       const extended = props.extendedProperties as Record<string, string> | undefined || {}
-      const resId = (props.resourceMetadata as Record<string, string> | undefined)?.resourceId || ''
-      const nameFromId = resId ? resId.split('/').pop() || resId : ''
+      const resMeta = props.resourceMetadata as Record<string, string> | undefined
+      const resId = resMeta?.resourceId || ''
+      const isArmPath = resId.includes('/subscriptions/')
+      const nameFromId = isArmPath ? (resId.split('/').pop() || resId) : ''
       return {
         resourceId: resId,
-        resourceName: extended.resourceName || nameFromId,
+        resourceName: extended.resourceName
+          || nameFromId
+          || (extended.sku ? `RI: ${extended.sku}` : '')
+          || (extended.savingsTarget ? `Savings: ${extended.savingsTarget}` : '')
+          || resId.slice(0, 30) || 'Subscription-level recommendation',
         recommendationType: (props.recommendationTypeId as string || '').split('/').pop() || 'general',
         impact: Math.max(0, parseFloat(String(props.impactedValue || '0'))) || 0,
         currency: 'USD',
@@ -335,7 +359,7 @@ export async function getContainerAppCount(): Promise<number> {
   const url = `https://management.azure.com/subscriptions/${subscriptionId}/providers/Microsoft.App/containerApps?api-version=2024-02-02-preview`
 
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithRetry(url, {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!res.ok) return 0

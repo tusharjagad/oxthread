@@ -113,6 +113,7 @@ export default function AzureCostManagementPage() {
   const [dismissingId, setDismissingId] = useState<string | null>(null)
   const [alertActionId, setAlertActionId] = useState<string | null>(null)
   const [showAllAlerts, setShowAllAlerts] = useState(false)
+  const [expandedAlert, setExpandedAlert] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -185,7 +186,8 @@ export default function AzureCostManagementPage() {
             <div key={c.label} className="stat-card"
               style={{
                 animation: `fadeSlideUp 0.5s ease-out ${i * 0.08}s both`,
-              }}
+                '--accent-color': c.color,
+              } as React.CSSProperties}
             >
               <div className="stat-card-icon" style={{ background: `${c.color}22` }}>
                 <span style={{ color: c.color }}><Icon size={18} /></span>
@@ -193,7 +195,7 @@ export default function AzureCostManagementPage() {
               <div className="stat-card-value" style={{ color: c.color }}>
                 {loading ? <span style={{ fontSize: '1.5rem' }}>…</span> : <NumberFlow value={c.value} />}
               </div>
-              <div className="stat-card-label" style={{ color: 'var(--text-secondary)' }}>{c.label}</div>
+              <div className="stat-card-label">{c.label}</div>
               {c.label === 'Current Month' && costData?.change !== undefined && (
                 <div className="stat-card-delta" style={{ color: costData.change > 0 ? '#ef4444' : '#10b981' }}>
                   <TrendingUp size={11} style={{ transform: costData.change > 0 ? 'rotate(0)' : 'scaleY(-1)' }} />
@@ -206,7 +208,7 @@ export default function AzureCostManagementPage() {
       </div>
 
       {alerts.length > 0 && (
-        <div className="card" style={{ marginBottom: '1.25rem', animation: 'fadeSlideUp 0.5s ease-out 0.1s both' }}>
+        <div className="card" style={{ marginBottom: '1.25rem', animation: 'fadeSlideUp 0.5s ease-out 0.1s both', background: 'linear-gradient(135deg, rgba(245,158,11,0.04), transparent)' }}>
           <div className="flex items-center justify-between mb-3">
             <h2 style={{ fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Activity size={16} style={{ color: '#f59e0b' }} />
@@ -226,45 +228,81 @@ export default function AzureCostManagementPage() {
             {(showAllAlerts ? alerts : alerts.slice(0, 5)).map((alert) => {
               const Icon = ALERT_ICONS[alert.type] || AlertTriangle
               const color = ALERT_COLORS[alert.severity] || '#6b7280'
+              const isExpanded = expandedAlert === alert.id
               return (
-                <div key={alert.id} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: '0.6rem',
-                  padding: '0.5rem 0.65rem', borderRadius: 8,
-                  background: 'var(--bg-elevated)', fontSize: '0.82rem',
-                }}>
+                <div key={alert.id}>
                   <div style={{
-                    width: 26, height: 26, borderRadius: 6, flexShrink: 0,
-                    background: `${color}18`, display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', color,
-                  }}>
-                    <Icon size={12} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.1rem' }}>
-                      <span style={{ fontWeight: 600, fontSize: '0.82rem' }}>{alert.title}</span>
-                      <span className={`badge badge-${alert.severity === 'critical' ? 'error' : alert.severity === 'high' ? 'warning' : 'info'}`}
-                        style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.03em', padding: '1px 5px' }}>
-                        {alert.severity}
-                      </span>
+                    display: 'flex', alignItems: 'flex-start', gap: '0.6rem',
+                    padding: '0.5rem 0.65rem', borderRadius: 8, cursor: 'pointer',
+                    background: isExpanded ? `${color}0a` : 'var(--bg-elevated)',
+                    fontSize: '0.82rem', border: isExpanded ? `1px solid ${color}22` : '1px solid transparent',
+                    transition: 'all 0.15s',
+                  }}
+                    onClick={() => setExpandedAlert(isExpanded ? null : alert.id)}
+                  >
+                    <div style={{
+                      width: 26, height: 26, borderRadius: 6, flexShrink: 0,
+                      background: `${color}18`, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', color,
+                    }}>
+                      <Icon size={12} />
                     </div>
-                    {alert.description && (
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', lineHeight: 1.4 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.1rem' }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.82rem' }}>{alert.title}</span>
+                        <span className={`badge badge-${alert.severity === 'critical' ? 'error' : alert.severity === 'high' ? 'warning' : 'info'}`}
+                          style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.03em', padding: '1px 5px' }}>
+                          {alert.severity}
+                        </span>
+                      </div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: isExpanded ? 'unset' : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {alert.description}
                       </div>
-                    )}
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, marginTop: '0.15rem' }}
+                      onClick={(e) => e.stopPropagation()}>
+                      <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.65rem', padding: '2px 6px', height: 'auto' }}
+                        onClick={() => alertAction(alert.id, 'acknowledge')}
+                        disabled={alertActionId === alert.id}>
+                        Ack
+                      </button>
+                      <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.65rem', padding: '2px 6px', height: 'auto' }}
+                        onClick={() => alertAction(alert.id, 'dismiss')}
+                        disabled={alertActionId === alert.id}>
+                        Dismiss
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '0.25rem', flexShrink: 0, marginTop: '0.15rem' }}>
-                    <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.65rem', padding: '2px 6px', height: 'auto' }}
-                      onClick={() => alertAction(alert.id, 'acknowledge')}
-                      disabled={alertActionId === alert.id}>
-                      Ack
-                    </button>
-                    <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.65rem', padding: '2px 6px', height: 'auto' }}
-                      onClick={() => alertAction(alert.id, 'dismiss')}
-                      disabled={alertActionId === alert.id}>
-                      Dismiss
-                    </button>
-                  </div>
+                  {isExpanded && (
+                    <div style={{
+                      margin: '0.25rem 0 0.25rem 2.2rem', padding: '0.6rem 0.75rem',
+                      borderRadius: 8, background: 'var(--bg-elevated)',
+                      fontSize: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem',
+                    }}>
+                      <div>
+                        <span style={{ color: 'var(--text-muted)' }}>Detected: </span>
+                        <span style={{ fontWeight: 500 }}>{new Date(alert.detectedAt).toLocaleString()}</span>
+                      </div>
+                      {alert.resourceName && (
+                        <div>
+                          <span style={{ color: 'var(--text-muted)' }}>Resource: </span>
+                          <span style={{ fontWeight: 500, fontFamily: 'var(--font-mono, monospace)' }}>{alert.resourceName}</span>
+                        </div>
+                      )}
+                      {alert.metricValue !== null && (
+                        <div>
+                          <span style={{ color: 'var(--text-muted)' }}>Current: </span>
+                          <span style={{ fontWeight: 500, color }}>${alert.metricValue.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {alert.threshold !== null && (
+                        <div>
+                          <span style={{ color: 'var(--text-muted)' }}>Threshold: </span>
+                          <span style={{ fontWeight: 500 }}>${alert.threshold.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -364,7 +402,15 @@ export default function AzureCostManagementPage() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>No cost data available. Check Azure credentials.</p>
+            <div style={{ textAlign: 'center', padding: '2.5rem 2rem' }}>
+              <DollarSign size={28} style={{ opacity: 0.15, marginBottom: '0.75rem' }} />
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.25rem' }}>Cost data unavailable</p>
+              {costData === null && (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', opacity: 0.7 }}>
+                  Azure Cost Management API may be rate-limited. Data will load on next sync.
+                </p>
+              )}
+            </div>
           )}
         </div>
 
@@ -398,7 +444,10 @@ export default function AzureCostManagementPage() {
               </div>
             </>
           ) : (
-            <p className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>No breakdown available</p>
+            <div style={{ textAlign: 'center', padding: '2.5rem 2rem' }}>
+              <DollarSign size={28} style={{ opacity: 0.15, marginBottom: '0.75rem' }} />
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Cost breakdown unavailable</p>
+            </div>
           )}
         </div>
       </div>
@@ -420,47 +469,52 @@ export default function AzureCostManagementPage() {
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {recommendations.map((rec) => (
-              <div key={rec.id} style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                padding: '0.75rem', borderRadius: 8,
-                background: 'var(--bg-elevated)',
-                transition: 'all 0.2s',
-              }}>
-                <div style={{
-                  width: 34, height: 34, borderRadius: 8, flexShrink: 0,
-                  background: 'rgba(16,185,129,0.12)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#10b981',
+            {recommendations.filter(r => r.impact > 0 || !r.resourceName.includes('Subscription-level')).map((rec) => {
+              const label = RECOMMENDATION_LABELS[rec.recommendationType] || rec.recommendationType.replace(/_/g, ' ')
+              return (
+                <div key={rec.id} style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  padding: '0.65rem 0.75rem', borderRadius: 8,
+                  background: 'var(--bg-elevated)',
+                  transition: 'all 0.2s',
                 }}>
-                  <CheckCircle2 size={15} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 500, lineHeight: 1.3 }}>
-                    {RECOMMENDATION_LABELS[rec.recommendationType] || rec.recommendationType.replace(/_/g, ' ')}
-                    <span style={{ color: 'var(--text-muted)' }}> on </span>
-                    <span className="font-mono" style={{ fontSize: '0.8rem' }}>{rec.resourceName}</span>
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 8, flexShrink: 0,
+                    background: 'rgba(16,185,129,0.12)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#10b981',
+                  }}>
+                    <CheckCircle2 size={15} />
                   </div>
-                  {rec.description && (
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                      {rec.description}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 500, lineHeight: 1.3 }}>
+                      {label}
+                      <span style={{ color: 'var(--text-muted)' }}> on </span>
+                      <span className="font-mono" style={{ fontSize: '0.8rem', color: rec.resourceName.length > 40 ? 'var(--text-muted)' : undefined }}>
+                        {rec.resourceName}
+                      </span>
                     </div>
-                  )}
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>${rec.impact.toFixed(0)}/mo</div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>potential</div>
+                    {rec.description && (
+                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                        {rec.description.slice(0, 120)}{rec.description.length > 120 ? '…' : ''}
+                      </div>
+                    )}
                   </div>
-                  <button className="btn btn-icon btn-ghost" title="Dismiss"
-                    onClick={() => dismiss(rec.id)}
-                    disabled={dismissingId === rec.id}
-                    style={{ opacity: 0.5 }}>
-                    {dismissingId === rec.id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
-                  </button>
+                  <div style={{ textAlign: 'right', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>${rec.impact.toFixed(0)}/mo</div>
+                      <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>potential</div>
+                    </div>
+                    <button className="btn btn-icon btn-ghost" title="Dismiss"
+                      onClick={() => dismiss(rec.id)}
+                      disabled={dismissingId === rec.id}
+                      style={{ opacity: 0.5 }}>
+                      {dismissingId === rec.id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
