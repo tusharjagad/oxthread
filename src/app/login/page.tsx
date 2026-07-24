@@ -378,30 +378,11 @@ export default function LoginPage() {
               animate="visible"
               style={{ position: 'relative', zIndex: 1 }}
             >
-              {/* Status indicator */}
-              <motion.div variants={itemVariants} className="flex items-center gap-2 mb-5">
-                <motion.span
-                  className="w-[7px] h-[7px] rounded-full"
-                  style={{ background: '#10B981' }}
-                  animate={{ opacity: [1, 0.4, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                />
-                <span className="text-[0.7rem] font-medium tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  All Systems Operational
-                </span>
-              </motion.div>
-
               {/* Card header */}
               <motion.div variants={itemVariants}>
-                <h2 className="text-[clamp(2rem,3vw,2.4rem)] font-bold leading-[1.1] tracking-tight text-white/90">
-                  Welcome Back
+                <h2 className="text-[clamp(1.6rem,2.5vw,2rem)] font-bold leading-[1.1] tracking-tight text-white/90">
+                  Welcome back
                 </h2>
-                <p
-                  className="mt-2.5"
-                  style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, lineHeight: 1.5 }}
-                >
-                  Sign in to your account to continue
-                </p>
               </motion.div>
 
               {/* Error */}
@@ -592,7 +573,7 @@ export default function LoginPage() {
                     {loading ? (
                       <div className="w-[18px] h-[18px] border-[2px] border-white/25 border-t-white rounded-full animate-spin" />
                     ) : (
-                      <motion.span className="flex items-center gap-2.5 relative" whileHover={{ gap: 14 }}>
+                      <span className="flex items-center gap-2.5 relative">
                         {/* Ripple */}
                         <AnimatePresence mode="popLayout">
                           {tapCount > 0 && (
@@ -607,17 +588,10 @@ export default function LoginPage() {
                             />
                           )}
                         </AnimatePresence>
-                        <motion.span whileHover={{ rotate: -8 }}>
-                          <Lock size={16} />
-                        </motion.span>
+                        <Lock size={16} />
                         Sign In
-                        <motion.span
-                          animate={{ x: [0, 3, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                        >
-                          <ChevronRight size={16} className="opacity-50" />
-                        </motion.span>
-                      </motion.span>
+                        <ChevronRight size={16} className="opacity-50" />
+                      </span>
                     )}
                   </motion.button>
                 </motion.div>

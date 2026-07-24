@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { TrendingUp, RefreshCw, Loader2, CheckCircle2, X, DollarSign, AlertTriangle, Activity } from '@/lib/icons'
+
+const ArrowUp = () => <TrendingUp size={12} style={{ color: '#ef4444' }} />
+const ArrowDown = () => <TrendingUp size={12} style={{ color: '#10b981', transform: 'scaleY(-1)' }} />
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
@@ -22,7 +25,7 @@ interface RecommendationsItem { id: string; resourceName: string; recommendation
 
 interface AiAlertItem {
   id: string
-  type: 'cost_spike' | 'unused_resource' | 'new_expensive_resource' | 'suspicious_activity'
+  type: 'cost_spike' | 'unused_resource' | 'new_expensive_resource' | 'suspicious_activity' | 'daily_spike' | 'new_resource'
   severity: 'low' | 'medium' | 'high' | 'critical'
   title: string
   description: string | null
@@ -31,6 +34,30 @@ interface AiAlertItem {
   threshold: number | null
   status: string
   detectedAt: string
+}
+
+interface ResourceChangeItem {
+  resourceName: string
+  resourceType: string
+  previousCost: number
+  currentCost: number
+  change: number
+  changePercent: number
+}
+
+interface IdleResourceItem {
+  resourceName: string
+  resourceType: string
+  monthlyCost: number
+  lastMonthCost: number
+  costVariance: number
+  reason: string
+}
+
+interface AnalysisData {
+  increases: ResourceChangeItem[]
+  idleResources: IdleResourceItem[]
+  summary: { totalResources: number; increases: number; idleCount: number; totalIdleCost: number }
 }
 
 const PIE_COLORS = ['#7c3aed','#3b82f6','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#0ea5e9']
@@ -47,6 +74,8 @@ const ALERT_ICONS: Record<string, typeof AlertTriangle> = {
   unused_resource: AlertTriangle,
   new_expensive_resource: DollarSign,
   suspicious_activity: Activity,
+  daily_spike: TrendingUp,
+  new_resource: DollarSign,
 }
 
 const ALERT_COLORS: Record<string, string> = {
@@ -79,6 +108,7 @@ export default function AzureCostManagementPage() {
   const [breakdown, setBreakdown] = useState<BreakdownItem[]>([])
   const [recommendations, setRecommendations] = useState<RecommendationsItem[]>([])
   const [alerts, setAlerts] = useState<AiAlertItem[]>([])
+  const [analysis, setAnalysis] = useState<AnalysisData | null>(null)
   const [loading, setLoading] = useState(true)
   const [dismissingId, setDismissingId] = useState<string | null>(null)
   const [alertActionId, setAlertActionId] = useState<string | null>(null)
@@ -86,16 +116,18 @@ export default function AzureCostManagementPage() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [cRes, bRes, rRes, aRes] = await Promise.all([
+      const [cRes, bRes, rRes, aRes, anRes] = await Promise.all([
         fetch('/api/azure/costs'),
         fetch('/api/azure/costs/breakdown'),
         fetch('/api/azure/recommendations'),
         fetch('/api/azure/alerts?status=open'),
+        fetch('/api/azure/costs/analysis'),
       ])
       if (cRes.ok) setCostData(await cRes.json())
       if (bRes.ok) { const d = await bRes.json(); setBreakdown(d.breakdown || []) }
       if (rRes.ok) { const d = await rRes.json(); setRecommendations(d.recommendations || []) }
       if (aRes.ok) { const d = await aRes.json(); setAlerts(d.alerts || []) }
+      if (anRes.ok) { const d = await anRes.json(); setAnalysis(d) }
     } catch {}
     setLoading(false)
   }, [])
@@ -227,6 +259,80 @@ export default function AzureCostManagementPage() {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {analysis && analysis.increases.length > 0 && (
+        <div className="card" style={{ marginBottom: '1.25rem', animation: 'fadeSlideUp 0.5s ease-out 0.12s both', borderLeft: '3px solid #ef4444' }}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 style={{ fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <TrendingUp size={16} style={{ color: '#ef4444' }} />
+              Resource Cost Hikes
+            </h2>
+            <span className="badge badge-error">{analysis.increases.length} resources</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {analysis.increases.slice(0, 10).map((r) => (
+              <div key={r.resourceName} style={{
+                display: 'flex', alignItems: 'center', gap: '0.75rem',
+                padding: '0.5rem 0.75rem', borderRadius: 6,
+                background: 'var(--bg-elevated)', fontSize: '0.82rem',
+              }}>
+                <ArrowUp />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500 }}>{r.resourceName}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{r.resourceType}</div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontWeight: 600, color: '#ef4444' }}>+{r.changePercent.toFixed(0)}%</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    ${r.previousCost.toFixed(0)} → ${r.currentCost.toFixed(0)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {analysis && analysis.idleResources.length > 0 && (
+        <div className="card" style={{ marginBottom: '1.25rem', animation: 'fadeSlideUp 0.5s ease-out 0.14s both', borderLeft: '3px solid #f59e0b' }}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 style={{ fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <AlertTriangle size={16} style={{ color: '#f59e0b' }} />
+              Idle Resources — Billed but Underutilized
+            </h2>
+            <span className="badge badge-warning">{analysis.idleResources.length} resources — ${analysis.summary.totalIdleCost.toFixed(0)}/mo</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {analysis.idleResources.slice(0, 10).map((r) => (
+              <div key={r.resourceName} style={{
+                display: 'flex', alignItems: 'center', gap: '0.75rem',
+                padding: '0.5rem 0.75rem', borderRadius: 6,
+                background: 'var(--bg-elevated)', fontSize: '0.82rem',
+              }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: 6, flexShrink: 0,
+                  background: 'rgba(245,158,11,0.12)', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', color: '#f59e0b',
+                }}>
+                  <AlertTriangle size={13} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500 }}>{r.resourceName}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    {r.resourceType} — {r.reason}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontWeight: 600, color: '#f59e0b' }}>${r.monthlyCost.toFixed(2)}/mo</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    {r.costVariance.toFixed(1)}% variance
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
