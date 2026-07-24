@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { processExpiredUsers, processExpiredAccessRequests } from '@/lib/postgres/scheduler'
 import { syncCostSnapshot } from '@/lib/azure-cost'
+import { syncAiAlerts } from '@/lib/ai-monitor'
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
@@ -11,10 +12,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const [userResult, requestResult, costResult] = await Promise.all([
+    const [userResult, requestResult, costResult, alertResult] = await Promise.all([
       processExpiredUsers(),
       processExpiredAccessRequests(),
       syncCostSnapshot().catch(() => null),
+      syncAiAlerts().catch(() => ({ created: 0 })),
     ])
 
     return NextResponse.json({
@@ -24,6 +26,7 @@ export async function POST(request: NextRequest) {
       accessRequestsExpired: requestResult,
       costSynced: costResult?.cost ?? null,
       costSnapshotId: costResult?.snapshotId ?? null,
+      alertsCreated: alertResult.created,
     })
   } catch (error) {
     return NextResponse.json({ error: (error as Error).message }, { status: 500 })

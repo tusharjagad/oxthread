@@ -1,0 +1,11 @@
+{
+  "version": "6.3.0",
+  "steps": [
+    {
+      "tag": "CreateTable",
+      "sql": "CREATE TABLE \"ai_alerts\" (\n    \"id\" UUID NOT NULL DEFAULT gen_random_uuid(),\n    \"type\" VARCHAR(50) NOT NULL,\n    \"severity\" VARCHAR(20) NOT NULL,\n    \"title\" TEXT NOT NULL,\n    \"description\" TEXT,\n    \"resource_id\" TEXT,\n    \"resource_name\" TEXT,\n    \"metric_value\" DOUBLE PRECISION,\n    \"threshold\" DOUBLE PRECISION,\n    \"status\" VARCHAR(20) NOT NULL DEFAULT 'open',\n    \"detected_at\" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"resolved_at\" TIMESTAMPTZ,\n    \"metadata\" JSONB,\n    CONSTRAINT \"ai_alerts_pkey\" PRIMARY KEY (\"id\")\n);"
+    }
+  ],
+  "sql": "CREATE TABLE \"ai_alerts\" (\n    \"id\" UUID NOT NULL DEFAULT gen_random_uuid(),\n    \"type\" VARCHAR(50) NOT NULL,\n    \"severity\" VARCHAR(20) NOT NULL,\n    \"title\" TEXT NOT NULL,\n    \"description\" TEXT,\n    \"resource_id\" TEXT,\n    \"resource_name\" TEXT,\n    \"metric_value\" DOUBLE PRECISION,\n    \"threshold\" DOUBLE PRECISION,\n    \"status\" VARCHAR(20) NOT NULL DEFAULT 'open',\n    \"detected_at\" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    \"resolved_at\" TIMESTAMPTZ,\n    \"metadata\" JSONB,\n    CONSTRAINT \"ai_alerts_pkey\" PRIMARY KEY (\"id\")\n);",
+  "datamodel": "%%%DATAMODEL%%%"
+}

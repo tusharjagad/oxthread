@@ -70,13 +70,12 @@ async function getAccessToken(): Promise<string> {
   return data.access_token
 }
 
-function buildCostQuery(timeframe: 'ThisMonth' | 'LastMonth' | 'Custom', from?: string, to?: string) {
+function buildCostQuery(timeframe: 'ThisMonth' | 'LastMonth') {
+  const range = getMonthDateRange(timeframe === 'ThisMonth' ? 0 : -1)
   return {
     type: 'ActualCost',
-    timeframe,
-    timePeriod: timeframe === 'Custom' && from && to
-      ? { from, to }
-      : undefined,
+    timeframe: 'Custom',
+    timePeriod: { from: range.from, to: range.to },
     dataset: {
       granularity: 'Daily',
       aggregation: {
@@ -87,7 +86,6 @@ function buildCostQuery(timeframe: 'ThisMonth' | 'LastMonth' | 'Custom', from?: 
         { type: 'Dimension', name: 'ResourceType' },
         { type: 'Dimension', name: 'ResourceLocation' },
       ],
-      ...(timeframe === 'Custom' ? {} : {}),
     },
   }
 }
@@ -96,6 +94,19 @@ function getSubscriptionId(): string {
   const subId = process.env.AZURE_SUBSCRIPTION_ID
   if (!subId) throw new Error('AZURE_SUBSCRIPTION_ID not configured')
   return subId
+}
+
+function getMonthDateRange(offset: number): { from: string; to: string } {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + offset
+  const first = new Date(year, month, 1)
+  const last = offset === 0 ? now : new Date(year, month + 1, 0)
+  last.setHours(23, 59, 59, 999)
+  return {
+    from: first.toISOString().split('T')[0],
+    to: last.toISOString().split('T')[0],
+  }
 }
 
 export async function queryMonthlyCost(timeframe: 'ThisMonth' | 'LastMonth' = 'ThisMonth'): Promise<CostQueryResult> {
@@ -249,7 +260,7 @@ export async function getAdvisorRecommendations(): Promise<Recommendation[]> {
         resourceId: (props.resourceMetadata as Record<string, string> | undefined)?.resourceId || '',
         resourceName: extended.resourceName || (rec.id as string || '').split('/').pop() || '',
         recommendationType: (props.recommendationTypeId as string || '').split('/').pop() || 'general',
-        impact: parseFloat(String(props.impactedValue || '0')),
+        impact: Math.max(0, parseFloat(String(props.impactedValue || '0'))) || 0,
         currency: 'USD',
         description: (props.shortDescription as Record<string, string> | undefined)?.solution || null,
         action: props.remediation as string | null,

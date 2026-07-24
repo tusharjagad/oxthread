@@ -276,3 +276,21 @@ model Invitation {
 
   @@map("invitations")
 }
+
+model AiAlert {
+  id           String   @id @default(uuid())
+  type         String   // cost_spike | unused_resource | new_expensive_resource | suspicious_activity
+  severity     String   // low | medium | high | critical
+  title        String
+  description  String?
+  resourceId   String?  @map("resource_id")
+  resourceName String?  @map("resource_name")
+  metricValue  Float?   @map("metric_value")
+  threshold    Float?
+  status       String   @default("open") // open | acknowledged | resolved | dismissed
+  detectedAt   DateTime @default(now()) @map("detected_at")
+  resolvedAt   DateTime? @map("resolved_at")
+  metadata     Json?
+
+  @@map("ai_alerts")
+}

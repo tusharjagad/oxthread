@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { TrendingUp, RefreshCw, Loader2, CheckCircle2, X, DollarSign } from '@/lib/icons'
+import { TrendingUp, RefreshCw, Loader2, CheckCircle2, X, DollarSign, AlertTriangle, Activity } from '@/lib/icons'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
@@ -20,6 +20,19 @@ interface BreakdownItem { type: string; resources: number; cost: number; percent
 
 interface RecommendationsItem { id: string; resourceName: string; recommendationType: string; impact: number; currency: string; description: string | null; action: string | null; status: string }
 
+interface AiAlertItem {
+  id: string
+  type: 'cost_spike' | 'unused_resource' | 'new_expensive_resource' | 'suspicious_activity'
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  title: string
+  description: string | null
+  resourceName: string | null
+  metricValue: number | null
+  threshold: number | null
+  status: string
+  detectedAt: string
+}
+
 const PIE_COLORS = ['#7c3aed','#3b82f6','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#0ea5e9']
 
 const RECOMMENDATION_LABELS: Record<string, string> = {
@@ -27,6 +40,20 @@ const RECOMMENDATION_LABELS: Record<string, string> = {
   reserved_instance: 'Buy reserved instance',
   idle_resource: 'Remove idle resource',
   storage_tier: 'Optimize storage tier',
+}
+
+const ALERT_ICONS: Record<string, typeof AlertTriangle> = {
+  cost_spike: TrendingUp,
+  unused_resource: AlertTriangle,
+  new_expensive_resource: DollarSign,
+  suspicious_activity: Activity,
+}
+
+const ALERT_COLORS: Record<string, string> = {
+  critical: '#ef4444',
+  high: '#f59e0b',
+  medium: '#3b82f6',
+  low: '#6b7280',
 }
 
 function NumberFlow({ value }: { value: number }) {
@@ -51,20 +78,24 @@ export default function AzureCostManagementPage() {
   const [costData, setCostData] = useState<CostData | null>(null)
   const [breakdown, setBreakdown] = useState<BreakdownItem[]>([])
   const [recommendations, setRecommendations] = useState<RecommendationsItem[]>([])
+  const [alerts, setAlerts] = useState<AiAlertItem[]>([])
   const [loading, setLoading] = useState(true)
   const [dismissingId, setDismissingId] = useState<string | null>(null)
+  const [alertActionId, setAlertActionId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [cRes, bRes, rRes] = await Promise.all([
+      const [cRes, bRes, rRes, aRes] = await Promise.all([
         fetch('/api/azure/costs'),
         fetch('/api/azure/costs/breakdown'),
         fetch('/api/azure/recommendations'),
+        fetch('/api/azure/alerts?status=open'),
       ])
       if (cRes.ok) setCostData(await cRes.json())
       if (bRes.ok) { const d = await bRes.json(); setBreakdown(d.breakdown || []) }
       if (rRes.ok) { const d = await rRes.json(); setRecommendations(d.recommendations || []) }
+      if (aRes.ok) { const d = await aRes.json(); setAlerts(d.alerts || []) }
     } catch {}
     setLoading(false)
   }, [])
@@ -80,6 +111,17 @@ export default function AzureCostManagementPage() {
     })
     setRecommendations(prev => prev.filter(r => r.id !== id))
     setDismissingId(null)
+  }
+
+  const alertAction = async (id: string, action: string) => {
+    setAlertActionId(id)
+    await fetch(`/api/azure/alerts/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action }),
+    })
+    setAlerts(prev => prev.filter(a => a.id !== id))
+    setAlertActionId(null)
   }
 
   const totalSavings = recommendations.reduce((sum, r) => sum + r.impact, 0)
@@ -129,6 +171,65 @@ export default function AzureCostManagementPage() {
           )
         })}
       </div>
+
+      {alerts.length > 0 && (
+        <div className="card" style={{ marginBottom: '1.25rem', animation: 'fadeSlideUp 0.5s ease-out 0.1s both', borderLeft: '3px solid #f59e0b' }}>
+          <div className="flex items-center justify-between mb-3">
+            <h2 style={{ fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Activity size={16} style={{ color: '#f59e0b' }} />
+              AI Monitoring Alerts
+            </h2>
+            <span className="badge badge-warning">{alerts.length} active</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {alerts.map((alert) => {
+              const Icon = ALERT_ICONS[alert.type] || AlertTriangle
+              const color = ALERT_COLORS[alert.severity] || '#6b7280'
+              return (
+                <div key={alert.id} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+                  padding: '0.65rem 0.75rem', borderRadius: 8,
+                  background: 'var(--bg-elevated)', fontSize: '0.85rem',
+                }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                    background: `${color}18`, display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', color,
+                  }}>
+                    <Icon size={14} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.15rem' }}>
+                      <span style={{ fontWeight: 600 }}>{alert.title}</span>
+                      <span className={`badge badge-${alert.severity === 'critical' ? 'error' : alert.severity === 'high' ? 'warning' : 'info'}`}
+                        style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                        {alert.severity}
+                      </span>
+                    </div>
+                    {alert.description && (
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: 1.4 }}>
+                        {alert.description}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
+                    <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.7rem' }}
+                      onClick={() => alertAction(alert.id, 'acknowledge')}
+                      disabled={alertActionId === alert.id}>
+                      Ack
+                    </button>
+                    <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.7rem' }}
+                      onClick={() => alertAction(alert.id, 'dismiss')}
+                      disabled={alertActionId === alert.id}>
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
         <div className="card" style={{ animation: 'fadeSlideUp 0.5s ease-out 0.15s both' }}>
